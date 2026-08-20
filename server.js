@@ -4,18 +4,24 @@ import cors from "cors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "./generated/prisma/client.ts";
+import { PrismaClient } from "@prisma/client";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET não configurado");
 }
 
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL não configurado");
+}
+
+const databaseUrl = new URL(process.env.DATABASE_URL);
+
 const adapter = new PrismaMariaDb({
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  password: "root123",
-  database: "meubanco",
+  host: databaseUrl.hostname,
+  port: Number(databaseUrl.port || 3306),
+  user: decodeURIComponent(databaseUrl.username),
+  password: decodeURIComponent(databaseUrl.password),
+  database: databaseUrl.pathname.slice(1),
   connectionLimit: 5,
 });
 
@@ -365,8 +371,14 @@ app.get("/resumo", authMiddleware, async (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+const port = Number(process.env.PORT || 3000);
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
 
 // app.put("/usuarios/:id", async (req, res) => {
