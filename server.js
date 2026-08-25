@@ -28,10 +28,15 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter });
 export { prisma };
 
+const FRONTEND_URL = "https://financial-manager-dusky.vercel.app";
+
 const app = express();
 app.use(express.json());
-//TODO CONFIGURAR CORS PARA PERMITIR APENAS O FRONTEND
-app.use(cors()); // PERMITE REQUISIÇÕES DE QUALQUER ORIGEM
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+  }),
+);
 
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
