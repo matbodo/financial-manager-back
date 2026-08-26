@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { prisma } from "../server";
+import { prisma } from "../server.js";
 
 export const UserController = {
   async updateIncome(req: Request, res: Response) {
