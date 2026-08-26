@@ -31,7 +31,7 @@ export function authMiddleware(
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string,
-    ) as unknown as TokenPayload;
+    ) as TokenPayload;
 
     req.user = decoded;
     return next();

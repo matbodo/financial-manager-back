@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { prisma } from "../../server.ts";
+import { prisma } from "../../server.js";
 
 export const GastosController = {
   async create(req: Request, res: Response) {
