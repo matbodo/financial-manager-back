@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { prisma } from "../../server.ts";
+import type { Request, Response } from "express";
+import { prisma } from "../../server.js";
 
 export const InvestimentsController = {
   async create(req: Request, res: Response) {
@@ -45,7 +45,7 @@ export const InvestimentsController = {
   async update(req: Request, res: Response) {
     try {
       const investimentId = Number(req.params.id);
-      const { name, vaue, date } = req.body;
+      const { name, value, date } = req.body;
       const numericValue = Number(value);
 
       const investimentExisting = await prisma.investimentos.findFirst({

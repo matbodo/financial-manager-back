@@ -3,7 +3,7 @@ import cors from "cors";
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { router } from "./routes";
+import { router } from "./src/routes.js";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET não configurado");

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 interface TokenPayload {
@@ -31,7 +31,7 @@ export function authMiddleware(
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string,
-    ) as TokenPayload;
+    ) as unknown as TokenPayload;
 
     req.user = decoded;
     return next();

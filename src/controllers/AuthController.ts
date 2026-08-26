@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { prisma } from "../../server.ts";
+import type { Request, Response } from "express";
+import { prisma } from "../../server.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -19,7 +19,10 @@ export const AuthController = {
       return res.status(401).json({ message: "Email ou senha inválidos" });
     }
 
-    const passwordMath = await bcrypt.compare(password, user.password);
+    const passwordMath = await bcrypt.compare(
+      password,
+      user.password as string,
+    );
 
     if (!passwordMath) {
       return res.status(401).json({ message: "Email ou senha inválidos" });
@@ -81,7 +84,7 @@ export const AuthController = {
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET as string,
       { expiresIn: "1d" },
     );
 

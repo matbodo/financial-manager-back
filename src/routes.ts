@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { AuthController } from "./controllers/AuthController";
-import { authMiddleware } from "./middlewares/AuthMiddleware";
+import { AuthController } from "./controllers/AuthController.js";
+import { authMiddleware } from "./middlewares/AuthMiddleware.js";
 import { GastosController } from "./controllers/GastosController.js";
 import { SignaturesController } from "./controllers/SignaturesController.js";
 import { InvestimentsController } from "./controllers/InvestimentsController.js";

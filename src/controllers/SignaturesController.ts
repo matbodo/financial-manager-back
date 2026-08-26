@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { prisma } from "../../server.ts";
+import type { Request, Response } from "express";
+import { prisma } from "../../server.js";
 
 export const SignaturesController = {
   async create(req: Request, res: Response) {
@@ -13,7 +13,7 @@ export const SignaturesController = {
           .json({ message: "Nome e valor são obrigatórios" });
       }
 
-      const signatures = await prisma.signatures.create({
+      const signatures = await prisma.assinaturas.create({
         data: {
           name: name.trim(),
           value: numericValue,
@@ -30,7 +30,7 @@ export const SignaturesController = {
 
   async list(req: Request, res: Response) {
     try {
-      const signatures = await prisma.signatures.findMany({
+      const signatures = await prisma.assinaturas.findMany({
         where: {
           user_id: req.user!.id,
         },
@@ -48,7 +48,7 @@ export const SignaturesController = {
       const { name, value, date } = req.body;
       const numericValue = Number(value);
 
-      const signatureExisting = await prisma.sigantures.findFirst({
+      const signatureExisting = await prisma.assinaturas.findFirst({
         where: {
           id: signatureId,
           user_id: req.user!.id,
@@ -59,7 +59,7 @@ export const SignaturesController = {
         return res.status(404).json({ message: "Assinatura não encontrada" });
       }
 
-      const signatureUpdated = await prisma.signatures.update({
+      const signatureUpdated = await prisma.assinaturas.update({
         where: {
           id: signatureExisting.id,
         },
@@ -81,9 +81,9 @@ export const SignaturesController = {
 
   async delete(req: Request, res: Response) {
     try {
-      const signature = await prisma.signatures.findFirst({
+      const signature = await prisma.assinaturas.findFirst({
         where: {
-          id: Numeber(req.params.id),
+          id: Number(req.params.id),
           user_id: req.user!.id,
         },
       });
@@ -93,7 +93,7 @@ export const SignaturesController = {
         1;
       }
 
-      await prisma.signatures.delete({
+      await prisma.assinaturas.delete({
         where: {
           id: signature.id,
         },
