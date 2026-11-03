@@ -43,4 +43,13 @@ router.delete("/gastos/:id", authMiddleware, GastosController.delete);
 // Resumo
 router.get("/resumo", authMiddleware, UserController.getSummary);
 
+router.get("/export-backup-json", async (_req, res) => {
+  const users = await prisma.user.findMany();
+  const assinaturas = await prisma.assinaturas.findMany();
+  const investimentos = await prisma.investimentos.findMany();
+  const gastos = await prisma.gastos.findMany();
+
+  return res.json({ users, assinaturas, investimentos, gastos });
+});
+
 export { router };
