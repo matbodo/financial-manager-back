@@ -1,29 +1,36 @@
 import type { Request, Response } from "express";
-import { prisma } from "../../server.js";
+import { prisma } from "../server.js";
+import {
+  updateSignatureSchema,
+  createSignatureSchema,
+} from "../schemas/signatureSchema.js";
 
 export const SignaturesController = {
   async create(req: Request, res: Response) {
     try {
-      const { name, value, date } = req.body;
-      const numericValue = Number(value);
+      const validation = createSignatureSchema.safeParse(req.body);
 
-      if (!name?.trim() || Number.isNaN(numericValue) || numericValue <= 0) {
-        return res
-          .status(400)
-          .json({ message: "Nome e valor são obrigatórios" });
+      if (!validation.success) {
+        return res.status(400).json({
+          message: "Dados inválidos",
+          error: validation.error.flatten().fieldErrors,
+        });
       }
+
+      const { name, value, date } = validation.data;
 
       const signatures = await prisma.assinaturas.create({
         data: {
-          name: name.trim(),
-          value: numericValue,
-          date: new Date(date),
+          name,
+          value,
+          date: date ? new Date(date) : new Date(),
           user_id: req.user!.id,
         },
       });
 
       return res.status(201).json(signatures);
     } catch (error) {
+      console.error(error);
       return res.status(500).json({ message: "Erro interno do servidor" });
     }
   },
@@ -45,8 +52,19 @@ export const SignaturesController = {
   async update(req: Request, res: Response) {
     try {
       const signatureId = Number(req.params.id);
-      const { name, value, date } = req.body;
-      const numericValue = Number(value);
+
+      if (Number.isNaN(signatureId)) {
+        return res.status(400).json({ message: "ID de assinatura inválido" });
+      }
+
+      const validation = updateSignatureSchema.safeParse(req.body);
+
+      if (!validation.success) {
+        return res.status(400).json({
+          message: "Dados inválidos",
+          error: validation.error.flatten().fieldErrors,
+        });
+      }
 
       const signatureExisting = await prisma.assinaturas.findFirst({
         where: {
@@ -59,38 +77,43 @@ export const SignaturesController = {
         return res.status(404).json({ message: "Assinatura não encontrada" });
       }
 
+      const { name, value, date } = validation.data;
+
       const signatureUpdated = await prisma.assinaturas.update({
         where: {
           id: signatureExisting.id,
         },
         data: {
-          name: name ? name.trim() : signatureExisting.name,
-          value:
-            !Number.isNaN(numericValue) && numericValue > 0
-              ? numericValue
-              : signatureExisting.value,
-          date: date ? new Date(date) : signatureExisting.created_at,
+          ...(name !== undefined && { name }),
+          ...(value !== undefined && { value }),
+          ...(date !== undefined && { date: new Date(date) }),
         },
       });
 
       return res.status(200).json(signatureUpdated);
     } catch (error) {
+      console.error(error);
       return res.status(500).json({ message: "Erro interno do servidor" });
     }
   },
 
   async delete(req: Request, res: Response) {
     try {
+      const signatureId = Number(req.params.id);
+
+      if (Number.isNaN(signatureId)) {
+        return res.status(400).json({ message: "ID de assinatura inválido" });
+      }
+
       const signature = await prisma.assinaturas.findFirst({
         where: {
-          id: Number(req.params.id),
+          id: signatureId,
           user_id: req.user!.id,
         },
       });
 
       if (!signature) {
         return res.status(404).json({ message: "Assinatura não encontrada" });
-        1;
       }
 
       await prisma.assinaturas.delete({

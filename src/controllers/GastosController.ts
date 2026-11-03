@@ -1,29 +1,36 @@
 import type { Request, Response } from "express";
-import { prisma } from "../../server.js";
+import { prisma } from "../server.js";
+import {
+  createGastoSchema,
+  updateGastoSchema,
+} from "../schemas/gastoSchema.js";
 
 export const GastosController = {
   async create(req: Request, res: Response) {
     try {
-      const { name, value, date } = req.body;
-      const numericValue = Number(value);
+      const validation = createGastoSchema.safeParse(req.body);
 
-      if (!name?.trim() || Number.isNaN(numericValue) || numericValue <= 0) {
-        return res
-          .status(400)
-          .json({ message: "Nome e valor são obrigatórios" });
+      if (!validation.success) {
+        return res.status(400).json({
+          message: "Dados inválidos",
+          errors: validation.error.flatten().fieldErrors,
+        });
       }
+
+      const { name, value, date } = validation.data;
 
       const gastos = await prisma.gastos.create({
         data: {
-          name: name.trim(),
-          value: numericValue,
-          date: new Date(date),
+          name,
+          value,
+          date: date ? new Date(date) : new Date(),
           user_id: req.user!.id,
         },
       });
 
       return res.status(201).json(gastos);
     } catch (error) {
+      console.error(error);
       return res.status(500).json({ message: "Erro interno do servidor" });
     }
   },
@@ -45,8 +52,19 @@ export const GastosController = {
   async update(req: Request, res: Response) {
     try {
       const gastoId = Number(req.params.id);
-      const { name, value, date } = req.body;
-      const numericValue = Number(value);
+
+      if (Number.isNaN(gastoId)) {
+        return res.status(400).json({ message: "ID de gasto inválido" });
+      }
+
+      const validation = updateGastoSchema.safeParse(req.body);
+
+      if (!validation.success) {
+        return res.status(400).json({
+          message: "Dados inválidos",
+          errors: validation.error.flatten().fieldErrors,
+        });
+      }
 
       const gastoExisting = await prisma.gastos.findFirst({
         where: {
@@ -59,28 +77,34 @@ export const GastosController = {
         return res.status(404).json({ message: "Gasto não encontrado" });
       }
 
+      const { name, value, date } = validation.data;
+
       const gastoUpdated = await prisma.gastos.update({
         where: {
           id: gastoExisting.id,
         },
         data: {
-          name: name ? name.trim() : gastoExisting.name,
-          value:
-            !Number.isNaN(numericValue) && numericValue > 0
-              ? numericValue
-              : gastoExisting.value,
-          date: date ? new Date(date) : gastoExisting.created_at,
+          ...(name !== undefined && { name }),
+          ...(value !== undefined && { value }),
+          ...(date !== undefined && { date: new Date(date) }),
         },
       });
 
       return res.status(200).json(gastoUpdated);
     } catch (error) {
+      console.error(error);
       return res.status(500).json({ message: "Erro interno do servidor" });
     }
   },
 
   async delete(req: Request, res: Response) {
     try {
+      const gastoId = Number(req.params.id);
+
+      if (Number.isNaN(gastoId)) {
+        return res.status(400).json({ message: "ID de gasto inválido" });
+      }
+
       const gasto = await prisma.gastos.findFirst({
         where: {
           id: Number(req.params.id),
@@ -98,7 +122,7 @@ export const GastosController = {
         },
       });
 
-      return res.status(200).json({ message: "Gasto deletado" });
+      return res.status(200).json({ message: "Gasto deletado com sucesso" });
     } catch (error) {
       return res.status(500).json({ message: "Erro interno do servidor" });
     }

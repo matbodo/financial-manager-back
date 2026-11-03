@@ -1,69 +1,96 @@
-markdown_content = """# 📋 Financial Manager Backend - Plano de Ação e Segurança
+# 📌 Backend Roadmap & TODO List — Financial Manager API
 
-Este documento contém o checklist de implementações necessárias para refatorar, proteger e escalar a API do seu gerenciador financeiro. As tarefas estão divididas por prioridade e contexto.
-
----
-
-## 🏗️ 1. Arquitetura e Organização (Refatoração)
-
-_Atualmente, o projeto concentra responsabilidades no `server.js`. O objetivo aqui é separar as camadas da aplicação._
-
-- [ ] **Implementar Padrão de Arquitetura (MVC/Modular):**
-  - Criar pasta `src/` na raiz do projeto.
-  - Criar subpastas: `routes/`, `controllers/`, `services/`, e `middlewares/`.
-- [ ] **Desacoplar Rotas do Servidor:**
-  - Mover as definições de rotas (`app.get`, `app.post`, etc.) do `server.js` para arquivos dentro de `src/routes/`.
-- [ ] **Isolar Regras de Negócio:**
-  - Garantir que os _controllers_ apenas recebam a requisição e devolvam a resposta.
-  - A lógica pesada (cálculos, chamadas ao Prisma) deve ficar na camada de _services_.
+Este documento detalha o plano de ação técnico para a evolução da API do **Financial Manager**. As tarefas estão divididas por fases de prioridade e complexidade.
 
 ---
 
-## 🔒 2. Segurança da Informação (Crítico)
+## 🎯 Fase 1: Segurança, Validação e Autenticação
 
-_Tratando-se de um sistema financeiro, as defesas contra invasões e vazamento de dados devem ser prioridade._
+> **Objetivo:** Reforçar a segurança da API e garantir a integridade dos dados trafegados.
 
-- [ ] **Ocultar Headers do Express (Helmet):**
-  - Instalar: `npm install helmet`
-  - Implementar no `server.js`: `app.use(helmet())`
-- [ ] **Validação Estrita de Dados (Sanitization):**
-  - Instalar biblioteca de validação (ex: **Zod** ou **Joi**).
-  - Criar _middlewares_ para validar `req.body` antes de chegar no controller (garantir que valores de transações sejam estritamente numéricos e que não haja injeção de scripts).
-- [ ] **Autenticação e Criptografia:**
-  - Implementar hash de senhas de usuários com `bcrypt`. **Nunca** salvar senhas em texto puro.
-  - Configurar emissão e validação de tokens JWT (`jsonwebtoken`) para proteger as rotas financeiras.
-- [ ] **Limitação de Taxa de Requisições (Rate Limiting):**
-  - Instalar: `npm install express-rate-limit`
-  - Configurar um limite (ex: 100 requisições por IP a cada 15 minutos) para evitar ataques de força bruta ou DDoS.
-- [ ] **Revisão do CORS:**
-  - Confirmar se o `FRONTEND_URL` configurado aceita requisições _apenas_ do domínio oficial de produção e do `localhost` durante o desenvolvimento.
+- **Validação de Schemas e Data Sanitization**
+  - [ ] Integrar biblioteca de validação (`Zod` ou `Yup`).
+  - [ ] Validar payload das requisições no middleware de entrada para login, registro e criação de registros.
+- **Mecanismo de Refresh Tokens**
+  - [ ] Reduzir o tempo de expiração do `JWT_SECRET` (ex: 15 a 30 minutos).
+  - [ ] Implementar `refreshToken` (armazenado no banco ou em HTTP-only Cookies) para renovar a sessão sem deslogar o usuário.
+- [ ] **Fluxo de Recuperação de Senha**
+  - [ ] Criar rota `POST /auth/forgot-password` para envio de e-mail com token temporário (usando _Resend_ ou _Nodemailer_).
+  - [ ] Criar rota `POST /auth/reset-password` para troca de senha validadas pelo token.
+- **Proteção contra Abuso (Rate Limiting)**
+  - [ ] Adicionar `express-rate-limit` para prevenir ataques de força bruta nas rotas `/login` e `/register`.
 
 ---
 
-## 💾 3. Banco de Dados e Funcionalidades (Prisma)
+## 📂 Fase 2: Categorização, Orçamentos e Filtros
 
-_Melhorias no `schema.prisma` para tornar a aplicação mais robusta para relatórios e gestão._
+> **Objetivo:** Dar flexibilidade para o usuário organizar e consultar suas finanças com precisão.
 
-- [ ] **Relacionamentos e Categorização:**
-  - Criar tabela `Category` (Categorias de receita/despesa).
-  - Estabelecer relação 1:N entre Categorias e Transações.
-- [ ] **Exclusão Lógica (Soft Delete):**
-  - Adicionar o campo `deletedAt DateTime?` nos modelos principais.
-  - Alterar as rotas de `DELETE` para apenas atualizar este campo, preservando o histórico financeiro sem excluir definitivamente a linha do banco.
-- [ ] **Paginação de Dados:**
-  - Implementar parâmetros `page` e `limit` nas rotas de listagem (GET).
-  - Utilizar `skip` e `take` no Prisma para não travar a API ao carregar grandes volumes de dados de uma vez.
+- [ ] **Gerenciamento de Categorias (CRUD)**
+  - [ ] Criar tabela `Category` no `schema.prisma` com campos: `id`, `name`, `color`, `icon`, `userId`.
+  - [ ] Vincular `Gasto` e `Renda` às categorias.
+  - [ ] Implementar rotas `/categorias` (`GET`, `POST`, `PUT`, `DELETE`).
+- [ ] **Orçamentos Mensais (Metas por Categoria)**
+  - [ ] Criar tabela `Budget` no `schema.prisma` com limite de gastos estipulado pelo usuário.
+  - [ ] Criar rota de consulta de status do orçamento (`/budgets/status`) que calcula gastos atuais vs. limite definido.
+- [ ] **Filtros Avançados e Paginação**
+  - [ ] Atualizar rotas de listagem (`/gastos`, `/investimentos`, `/assinaturas`) para suportar _query params_:
+    - `page` e `limit` (paginação de resultados).
+    - `startDate` e `endDate` (filtro por intervalo de datas).
+    - `categoryId` (filtro por categoria específica).
+    - `sortBy` e `order` (ordenação por valor, data, etc.).
 
 ---
 
-## 🛠️ 4. Fluxo de Trabalho (Dica de Produtividade)
+## 🔄 Fase 3: Automações e Agendamento (Cron Jobs)
 
-- [ ] **Gestão de Tarefas:** Adicione estes itens ao seu board no **Jira** ou como _Issues_ no repositório do **GitHub** para acompanhar o progresso das sprints do projeto.
-- [ ] **Desenvolvimento Ágil:** Ao implementar ferramentas padrão como Zod, Bcrypt ou middlewares de JWT, lembre-se de que assistentes de IA (como o **GitHub Copilot**) podem gerar o _boilerplate_ inicial dessas configurações rapidamente, economizando tempo para você focar na lógica de negócios financeira.
+> **Objetivo:** Automatizar tarefas repetitivas e garantir atualização em tempo real sem intervenção manual.
 
-"""
+- [ ] **Processamento de Assinaturas Recorrentes**
+  - [ ] Integrar biblioteca de agendamento de tarefas (`node-cron`).
+  - [ ] Criar rotina diária (executada à meia-noite) que verifica assinaturas ativas com vencimento no dia e lança o valor automaticamente na tabela de `Gasto`.
+- [ ] **Notificações por E-mail / Push**
+  - [ ] Enviar lembretes prévios de vencimento de assinaturas e faturas ativas 3 dias antes do vencimento.
 
-with open("/mnt/data/financial-manager-todo.md", "w", encoding="utf-8") as file:
-file.write(markdown_content)
+---
 
-print("File generated successfully.")
+## 📊 Fase 4: Relatórios Avançados e Exportação
+
+> **Objetivo:** Permitir ao usuário extrair relatórios detalhados da sua saúde financeira.
+
+- [ ] **Endpoint Consolidado de Análise (`GET /resumo/analitico`)**
+  - [ ] Calcular taxa de poupança mensal (`(Renda Total - Gastos Totais) / Renda Total * 100`).
+  - [ ] Agrupar gastos por categoria em formato pronto para gráficos de rosca (`pie chart`).
+  - [ ] Retornar evolução patrimonial dos últimos 6 meses.
+- [ ] **Exportação de Dados**
+  - [ ] Criar rota `GET /export/csv` para download da planilha de movimentações em formato CSV.
+  - [ ] Criar rota `GET /export/pdf` para geração de relatório financeiro formatado em PDF (utilizando `pdfkit` ou `puppeteer`).
+
+---
+
+## 🏛️ Fase 5: Expansão de Arquitetura (Múltiplas Contas & Cartões)
+
+> **Objetivo:** Evoluir o modelo de dados para suportar gerenciamento de múltiplas bancas e faturas de cartão.
+
+- [ ] **Gestão de Contas (`Account`)**
+  - [ ] Modelar contas no Prisma (ex: Banco Inter, Nubank, Carteira de Dinheiro).
+  - [ ] Permitir vincular receitas e despesas a uma conta específica com atualização dinâmica de saldo.
+- [ ] **Gestão de Cartões de Crédito**
+  - [ ] Modelar controle de faturas (data de fechamento e data de vencimento).
+  - [ ] Agrupar compras parceladas distribuindo os lançamentos nos meses subsequentes.
+
+---
+
+## 🧪 Fase 6: Testes, Documentação e Observabilidade
+
+> **Objetivo:** Manter o código testável, documentado e monitorado no Render.
+
+- [ ] **Documentação da API com Swagger/OpenAPI**
+  - [ ] Configurar `swagger-ui-express` para documentar todos os endpoints, corpos de requisição e respostas.
+- [ ] **Testes Automatizados**
+  - [ ] Configurar ambiente de testes com `Jest` ou `Vitest` + `Supertest`.
+  - [ ] Escrever testes unitários para a lógica de autenticação e controllers.
+  - [ ] Escrever testes de integração para as rotas principais.
+- [ ] **Monitoramento de Logs e Erros**
+  - [ ] Integrar sistema de logging como `Winston` ou `Pino`.
+  - [ ] Configurar `Sentry` para captura e alerta automático de erros em produção no Render.
