@@ -10,9 +10,9 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 
 - **Validação de Schemas e Data Sanitization**
   - [x] Integrar biblioteca de validação `Zod`.
-  - [ ] Validar payload das requisições no middleware de entrada para login, registro e criação de registros.
+  - [x] Validar payload das requisições no middleware de entrada para login, registro e criação de registros.
 - **Mecanismo de Refresh Tokens**
-  - [ ] Reduzir o tempo de expiração do `JWT_SECRET` (ex: 15 a 30 minutos).
+  - [x] Reduzir o tempo de expiração do `JWT_SECRET` (ex: 15 a 30 minutos).
   - [ ] Implementar `refreshToken` (armazenado no banco ou em HTTP-only Cookies) para renovar a sessão sem deslogar o usuário.
 - [ ] **Fluxo de Recuperação de Senha**
   - [ ] Criar rota `POST /auth/forgot-password` para envio de e-mail com token temporário (usando _Resend_ ou _Nodemailer_).

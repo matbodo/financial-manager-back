@@ -5,8 +5,13 @@ import { GastosController } from "./controllers/GastosController.js";
 import { SignaturesController } from "./controllers/SignaturesController.js";
 import { InvestimentsController } from "./controllers/InvestimentsController.js";
 import { UserController } from "./controllers/UserController.js";
+import { validateSchema } from "./schemas/validateSchema.js";
 
-import { registerSchema, loginSchema } from "./schemas/authSchema.js";
+import {
+  registerSchema,
+  loginSchema,
+  refreshTokenSchema,
+} from "./schemas/authSchema.js";
 import { createGastoSchema, updateGastoSchema } from "./schemas/gastoSchema.js";
 
 const router = Router();
@@ -40,14 +45,14 @@ router.delete(
 
 router.post(
   "/gastos",
-  AuthMiddleware,
+  authMiddleware,
   validateSchema(createGastoSchema),
   GastosController.create,
 );
 router.get("/gastos", authMiddleware, GastosController.list);
 router.put(
   "/gastos/:id",
-  AuthMiddleware,
+  authMiddleware,
   validateSchema(createGastoSchema),
   GastosController.create,
 );

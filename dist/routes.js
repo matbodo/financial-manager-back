@@ -8,29 +8,27 @@ const GastosController_js_1 = require("./controllers/GastosController.js");
 const SignaturesController_js_1 = require("./controllers/SignaturesController.js");
 const InvestimentsController_js_1 = require("./controllers/InvestimentsController.js");
 const UserController_js_1 = require("./controllers/UserController.js");
+const validateSchema_js_1 = require("./schemas/validateSchema.js");
+const authSchema_js_1 = require("./schemas/authSchema.js");
+const gastoSchema_js_1 = require("./schemas/gastoSchema.js");
 const router = (0, express_1.Router)();
 exports.router = router;
 router.get("/health", (_req, res) => {
     res.status(200).json({ status: "ok" });
 });
-router.post("/login", AuthController_js_1.AuthController.login);
-router.post("/register", AuthController_js_1.AuthController.register);
-// Renda
+router.post("/login", (0, validateSchema_js_1.validateSchema)(authSchema_js_1.loginSchema), AuthController_js_1.AuthController.login);
+router.post("/register", (0, validateSchema_js_1.validateSchema)(authSchema_js_1.registerSchema), AuthController_js_1.AuthController.register);
 router.patch("/usuarios/renda", AuthMiddleware_js_1.authMiddleware, UserController_js_1.UserController.updateIncome);
-// Assinaturas
 router.post("/assinaturas", AuthMiddleware_js_1.authMiddleware, SignaturesController_js_1.SignaturesController.create);
 router.get("/assinaturas", AuthMiddleware_js_1.authMiddleware, SignaturesController_js_1.SignaturesController.list);
 router.put("/assinaturas/:id", AuthMiddleware_js_1.authMiddleware, SignaturesController_js_1.SignaturesController.update);
 router.delete("/assinaturas/:id", AuthMiddleware_js_1.authMiddleware, SignaturesController_js_1.SignaturesController.delete);
-// Investimentos
 router.post("/investimentos", AuthMiddleware_js_1.authMiddleware, InvestimentsController_js_1.InvestimentsController.create);
 router.get("/investimentos", AuthMiddleware_js_1.authMiddleware, InvestimentsController_js_1.InvestimentsController.list);
 router.put("/investimentos/:id", AuthMiddleware_js_1.authMiddleware, InvestimentsController_js_1.InvestimentsController.update);
 router.delete("/investimentos/:id", AuthMiddleware_js_1.authMiddleware, InvestimentsController_js_1.InvestimentsController.delete);
-// Gastos
-router.post("/gastos", AuthMiddleware_js_1.authMiddleware, GastosController_js_1.GastosController.create);
+router.post("/gastos", AuthMiddleware_js_1.authMiddleware, (0, validateSchema_js_1.validateSchema)(gastoSchema_js_1.createGastoSchema), GastosController_js_1.GastosController.create);
 router.get("/gastos", AuthMiddleware_js_1.authMiddleware, GastosController_js_1.GastosController.list);
-router.put("/gastos/:id", AuthMiddleware_js_1.authMiddleware, GastosController_js_1.GastosController.update);
+router.put("/gastos/:id", AuthMiddleware_js_1.authMiddleware, (0, validateSchema_js_1.validateSchema)(gastoSchema_js_1.createGastoSchema), GastosController_js_1.GastosController.create);
 router.delete("/gastos/:id", AuthMiddleware_js_1.authMiddleware, GastosController_js_1.GastosController.delete);
-// Resumo
 router.get("/resumo", AuthMiddleware_js_1.authMiddleware, UserController_js_1.UserController.getSummary);
