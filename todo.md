@@ -9,7 +9,7 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 > **Objetivo:** Reforçar a segurança da API e garantir a integridade dos dados trafegados.
 
 - **Validação de Schemas e Data Sanitization**
-  - [ ] Integrar biblioteca de validação (`Zod` ou `Yup`).
+  - [x] Integrar biblioteca de validação `Zod`.
   - [ ] Validar payload das requisições no middleware de entrada para login, registro e criação de registros.
 - **Mecanismo de Refresh Tokens**
   - [ ] Reduzir o tempo de expiração do `JWT_SECRET` (ex: 15 a 30 minutos).
