@@ -4,6 +4,26 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { refreshTokenSchema } from "../schemas/authSchema.js";
 
+async function generateAndSaveRefreshToken(userId: number): Promise<string> {
+  const refreshToken = jwt.sign(
+    { id: userId },
+    process.env.REFRESH_TOKEN_SECRET as string,
+    { expiresIn: "7d" },
+  );
+
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  await prisma.refreshToken.create({
+    data: {
+      token: refreshToken,
+      user_id: userId,
+      expiresAt,
+    },
+  });
+
+  return refreshToken;
+}
 export const AuthController = {
   async login(req: Request, res: Response) {
     try {
@@ -30,14 +50,11 @@ export const AuthController = {
         { expiresIn: "15m" },
       );
 
-      const refresToken = jwt.sign(
-        { id: user.id },
-        process.env.REFRESH_JWT_SECRET as string,
-        { expiresIn: "7d" },
-      );
+      const refreshToken = await generateAndSaveRefreshToken(user.id);
 
       return res.status(200).json({
         token,
+        refreshToken,
         user: {
           id: user.id,
           name: user.name,
@@ -77,14 +94,11 @@ export const AuthController = {
         { expiresIn: "1d" },
       );
 
-      const refresToken = jwt.sign(
-        { id: user.id },
-        process.env.REFRESH_JWT_SECRET as string,
-        { expiresIn: "7d" },
-      );
+      const refreshToken = await generateAndSaveRefreshToken(user.id);
 
       return res.status(201).json({
         token,
+        refreshToken,
         user: {
           id: user.id,
           name: user.name,
@@ -102,30 +116,72 @@ export const AuthController = {
     try {
       const { refreshToken } = req.body;
 
-      const decode = jwt.verify(
+      // 1. Verifica se a assinatura JWT é válida
+      const decoded = jwt.verify(
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET as string,
       ) as { id: number };
 
+      // 2. Busca o token no banco de dados
+      const storedToken = await prisma.refreshToken.findUnique({
+        where: { token: refreshToken },
+      });
+
+      if (!storedToken) {
+        return res
+          .status(401)
+          .json({ message: "Refresh token inválido ou revogado" });
+      }
+
+      // 3. Remove o token antigo (Rotação de Refresh Token)
+      await prisma.refreshToken.delete({
+        where: { id: storedToken.id },
+      });
+
+      // 4. Busca o usuário
       const user = await prisma.user.findUnique({
-        where: { id: decode.id },
+        where: { id: decoded.id },
       });
 
       if (!user) {
         return res.status(401).json({ message: "Usuário não encontrado" });
       }
 
+      // 5. Emite um novo Access Token e um novo Refresh Token
       const newToken = jwt.sign(
         { id: user.id, email: user.email },
         process.env.JWT_SECRET as string,
         { expiresIn: "15m" },
       );
 
-      return res.status(200).json({ token: newToken });
+      const newRefreshToken = await generateAndSaveRefreshToken(user.id);
+
+      return res.status(200).json({
+        token: newToken,
+        refreshToken: newRefreshToken,
+      });
     } catch (error) {
+      console.error(error);
       return res
         .status(401)
         .json({ message: "Refresh token inválido ou expirado" });
+    }
+  },
+
+  async logout(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+
+      if (refreshToken) {
+        await prisma.refreshToken.deleteMany({
+          where: { token: refreshToken },
+        });
+      }
+
+      return res.status(200).json({ message: "Logout realizado com sucesso" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Erro ao realizar logout" });
     }
   },
 };
