@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { email, z } from "zod";
 
 export const registerSchema = z.object({
   name: z.string().trim().min(2, "O nome deve ter pelo menos 2 caracteres"),
@@ -13,4 +13,8 @@ export const loginSchema = z.object({
 
 export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1, "O refresh token é obrigatório"),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.strict().trim().email("Formato de e-mail inválido"),
 });

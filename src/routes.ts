@@ -6,6 +6,7 @@ import { SignaturesController } from "./controllers/SignaturesController.js";
 import { InvestimentsController } from "./controllers/InvestimentsController.js";
 import { UserController } from "./controllers/UserController.js";
 import { validateSchema } from "./schemas/validateSchema.js";
+import { forgotPassword } from "./schemas/authSchema.js";
 
 import {
   registerSchema,
@@ -25,6 +26,11 @@ router.post(
   "/register",
   validateSchema(registerSchema),
   AuthController.register,
+);
+router.post(
+  "/forgot-password",
+  validateSchema(forgotPassword),
+  AuthController.forgortPassword,
 );
 
 router.patch("/usuarios/renda", authMiddleware, UserController.updateIncome);

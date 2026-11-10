@@ -2,7 +2,9 @@ import type { Request, Response } from "express";
 import { prisma } from "../server.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { refreshTokenSchema } from "../schemas/authSchema.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 async function generateAndSaveRefreshToken(userId: number): Promise<string> {
   const refreshToken = jwt.sign(
@@ -182,6 +184,60 @@ export const AuthController = {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Erro ao realizar logout" });
+    }
+  },
+
+  async forgortPassword(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+
+      const user = await prisma.user.findUnique({ where: email });
+
+      if (!user) {
+        return res
+          .status(200)
+          .json({
+            message:
+              "Se o e-mail for valido, um link de recuperação foi enviado.",
+          });
+      }
+
+      const resetToken = crypto.randomBytes(32).toString("hex");
+
+      const resetTokenExpires = newDate();
+      resetTokenExpires.setHours(resetTokenExpires.getHours() + 1);
+
+      await prisma.user.update({
+        where: { id: email.id },
+        data: {
+          resetToken,
+          resetTokenExpires,
+        },
+      });
+
+      const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
+
+      await sendEmail({
+        to: user.email!,
+        subject: "Recuperação de senha",
+        html: `<h3>Você solicitou a recuperação de senha</h3>
+          <p>Clique no link abaixo para redefinir sua senha. Este link é válido por 1 hora.</p>
+          <a href="${resetUrl}" target="_blank">Redefinir Senha</a>
+          <br/><br/>
+          <p>Se você não solicitou isso, ignore este e-mail.</p>
+          `,
+      });
+
+      return res
+        .status(200)
+        .json({
+          message: "Se o e-mail existir, um link de recuperação foi enviado.",
+        });
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ message: "Erro ao tentar enviar e-mail de recuperação" });
     }
   },
 };
