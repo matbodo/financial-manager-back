@@ -16,5 +16,5 @@ export const refreshTokenSchema = z.object({
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.strict().trim().email("Formato de e-mail inválido"),
+  email: z.string().trim().email("Formato de e-mail inválido"),
 });

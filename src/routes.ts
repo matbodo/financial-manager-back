@@ -6,7 +6,7 @@ import { SignaturesController } from "./controllers/SignaturesController.js";
 import { InvestimentsController } from "./controllers/InvestimentsController.js";
 import { UserController } from "./controllers/UserController.js";
 import { validateSchema } from "./schemas/validateSchema.js";
-import { forgotPassword } from "./schemas/authSchema.js";
+import { forgotPasswordSchema } from "./schemas/authSchema.js";
 
 import {
   registerSchema,
@@ -29,7 +29,7 @@ router.post(
 );
 router.post(
   "/forgot-password",
-  validateSchema(forgotPassword),
+  validateSchema(forgotPasswordSchema),
   AuthController.forgortPassword,
 );
 

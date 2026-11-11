@@ -20,7 +20,7 @@ export const sendEmail = async (options: SendEmailOptions) => {
   await transporter.sendMail({
     from: `"Gestor Financeiro" <${process.env.EMAIL_FROM || "no-reply@gestor.com"}>`,
     to: options.to,
-    subject: process.subject,
+    subject: options.subject,
     html: options.html,
   });
 };

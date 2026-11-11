@@ -10,14 +10,16 @@ const InvestimentsController_js_1 = require("./controllers/InvestimentsControlle
 const UserController_js_1 = require("./controllers/UserController.js");
 const validateSchema_js_1 = require("./schemas/validateSchema.js");
 const authSchema_js_1 = require("./schemas/authSchema.js");
+const authSchema_js_2 = require("./schemas/authSchema.js");
 const gastoSchema_js_1 = require("./schemas/gastoSchema.js");
 const router = (0, express_1.Router)();
 exports.router = router;
 router.get("/health", (_req, res) => {
     res.status(200).json({ status: "ok" });
 });
-router.post("/login", (0, validateSchema_js_1.validateSchema)(authSchema_js_1.loginSchema), AuthController_js_1.AuthController.login);
-router.post("/register", (0, validateSchema_js_1.validateSchema)(authSchema_js_1.registerSchema), AuthController_js_1.AuthController.register);
+router.post("/login", (0, validateSchema_js_1.validateSchema)(authSchema_js_2.loginSchema), AuthController_js_1.AuthController.login);
+router.post("/register", (0, validateSchema_js_1.validateSchema)(authSchema_js_2.registerSchema), AuthController_js_1.AuthController.register);
+router.post("/forgot-password", (0, validateSchema_js_1.validateSchema)(authSchema_js_1.forgotPasswordSchema), AuthController_js_1.AuthController.forgortPassword);
 router.patch("/usuarios/renda", AuthMiddleware_js_1.authMiddleware, UserController_js_1.UserController.updateIncome);
 router.post("/assinaturas", AuthMiddleware_js_1.authMiddleware, SignaturesController_js_1.SignaturesController.create);
 router.get("/assinaturas", AuthMiddleware_js_1.authMiddleware, SignaturesController_js_1.SignaturesController.list);

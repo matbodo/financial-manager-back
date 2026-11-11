@@ -194,17 +194,15 @@ export const AuthController = {
       const user = await prisma.user.findUnique({ where: email });
 
       if (!user) {
-        return res
-          .status(200)
-          .json({
-            message:
-              "Se o e-mail for valido, um link de recuperação foi enviado.",
-          });
+        return res.status(200).json({
+          message:
+            "Se o e-mail for valido, um link de recuperação foi enviado.",
+        });
       }
 
       const resetToken = crypto.randomBytes(32).toString("hex");
 
-      const resetTokenExpires = newDate();
+      const resetTokenExpires = new Date();
       resetTokenExpires.setHours(resetTokenExpires.getHours() + 1);
 
       await prisma.user.update({
@@ -228,11 +226,9 @@ export const AuthController = {
           `,
       });
 
-      return res
-        .status(200)
-        .json({
-          message: "Se o e-mail existir, um link de recuperação foi enviado.",
-        });
+      return res.status(200).json({
+        message: "Se o e-mail existir, um link de recuperação foi enviado.",
+      });
     } catch (error) {
       console.error(error);
       return res
