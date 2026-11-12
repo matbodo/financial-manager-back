@@ -5,7 +5,7 @@ export class CategoryController {
   static async create(req: Request, res: Response) {
     try {
       const { name, color, icon } = req.body;
-      const userId = (req as any).userId;
+      const userId = req.user!.id;
 
       const category = await prisma.category.create({
         data: {
@@ -25,7 +25,7 @@ export class CategoryController {
 
   static async list(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
+      const userId = req.user!.id;
 
       const categories = await prisma.category.findMany({
         where: { user_id: userId },
@@ -42,7 +42,7 @@ export class CategoryController {
     try {
       const { id } = req.params;
       const { name, color, icon } = req.body;
-      const userId = (req as any).userId;
+      const userId = req.user!.id;
 
       const existingCategory = await prisma.category.findFirst({
         where: { id: Number(id), user_id: userId },
@@ -67,7 +67,7 @@ export class CategoryController {
   static async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const userId = (req as any).userId;
+      const userId = req.user!.id;
 
       const existingCategory = await prisma.category.findFirst({
         where: { id: Number(id), user_id: userId },
