@@ -206,7 +206,7 @@ export const AuthController = {
       resetTokenExpires.setHours(resetTokenExpires.getHours() + 1);
 
       await prisma.user.update({
-        where: { id: email.id },
+        where: { id: user.id },
         data: {
           resetToken,
           resetTokenExpires,
