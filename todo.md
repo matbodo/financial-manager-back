@@ -14,9 +14,9 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 - **Mecanismo de Refresh Tokens**
   - [x] Reduzir o tempo de expiração do `JWT_SECRET` (ex: 15 a 30 minutos).
   - [x] Implementar `refreshToken` (armazenado no banco ou em HTTP-only Cookies) para renovar a sessão sem deslogar o usuário.
-- [ ] **Fluxo de Recuperação de Senha**
-  - [ ] Criar rota `POST /auth/forgot-password` para envio de e-mail com token temporário (usando _Resend_ ou _Nodemailer_).
-  - [ ] Criar rota `POST /auth/reset-password` para troca de senha validadas pelo token.
+- [x] **Fluxo de Recuperação de Senha**
+  - [x] Criar rota `POST /auth/forgot-password` para envio de e-mail com token temporário (usando _Resend_ ou _Nodemailer_).
+  - [x] Criar rota `POST /auth/reset-password` para troca de senha validadas pelo token.
 - **Proteção contra Abuso (Rate Limiting)**
   - [ ] Adicionar `express-rate-limit` para prevenir ataques de força bruta nas rotas `/login` e `/register`.
 

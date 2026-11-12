@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "./controllers/AuthController.js";
 import { authMiddleware } from "./middlewares/AuthMiddleware.js";
+import { authLimiter } from "./middlewares/rateLimiter.js";
 import { GastosController } from "./controllers/GastosController.js";
 import { SignaturesController } from "./controllers/SignaturesController.js";
 import { InvestimentsController } from "./controllers/InvestimentsController.js";
@@ -24,14 +25,21 @@ router.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-router.post("/login", validateSchema(loginSchema), AuthController.login);
+router.post(
+  "/login",
+  authLimiter,
+  validateSchema(loginSchema),
+  AuthController.login,
+);
 router.post(
   "/register",
+  authLimiter,
   validateSchema(registerSchema),
   AuthController.register,
 );
 router.post(
   "/forgot-password",
+  authLimiter,
   validateSchema(forgotPasswordSchema),
   AuthController.forgotPassword,
 );
