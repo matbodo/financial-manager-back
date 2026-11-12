@@ -1,9 +1,5 @@
 import { Response, Request } from "express";
-import { PrismaClient } from "@prisma/client";
-import { json } from "zod";
-import { tr } from "zod/v4/locales/index.js";
-
-const prisma = new PrismaClient();
+import { prisma } from "../server";
 
 export class CategoryController {
   static async create(req: Request, res: Response) {
@@ -48,7 +44,7 @@ export class CategoryController {
       const { name, color, icon } = req.body;
       const userId = (req as any).userId;
 
-      const existingCategory = await prisma.user.findFirst({
+      const existingCategory = await prisma.category.findFirst({
         where: { id: Number(id), user_id: userId },
       });
 
@@ -61,7 +57,7 @@ export class CategoryController {
         data: { name, color, icon },
       });
 
-      return res.status(201).json(updatedCategory);
+      return res.status(200).json(updatedCategory);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Erro ao atualizar categoria" });
