@@ -18,7 +18,7 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
   - [x] Criar rota `POST /auth/forgot-password` para envio de e-mail com token temporário (usando _Resend_ ou _Nodemailer_).
   - [x] Criar rota `POST /auth/reset-password` para troca de senha validadas pelo token.
 - **Proteção contra Abuso (Rate Limiting)**
-  - [ ] Adicionar `express-rate-limit` para prevenir ataques de força bruta nas rotas `/login` e `/register`.
+  - [x] Adicionar `express-rate-limit` para prevenir ataques de força bruta nas rotas `/login` e `/register`.
 
 ---
 
@@ -81,7 +81,25 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 
 ---
 
-## 🧪 Fase 6: Testes, Documentação e Observabilidade
+## 💳 Fase 6: Captura Dinâmica de Gastos (Importação & Automação)
+
+> **Objetivo:** Oferecer múltiplas formas flexíveis para o usuário registrar os gastos do cartão automaticamente, permitindo que ele escolha o método mais conveniente.
+
+- [ ] **Preferência de Método de Captura**
+  - [ ] Permitir que o usuário configure no perfil qual fluxo prefere utilizar (`MANUAL`, `IMPORTACAO_ARQUIVO` ou `WEBHOOK_NOTIFICACAO`).
+- [ ] **Opção A — Importação de Fatura por Arquivo (`CSV` e `OFX`)**
+  - [ ] Configurar upload de arquivos na API com `multer` (armazenamento em memória).
+  - [ ] Integrar parsers para padronização de extratos/faturas em `.csv` (`csv-parse`) e `.ofx` (`ofx-js`).
+  - [ ] Criar rota `POST /gastos/importar` para processar e salvar os lançamentos em lote.
+  - [ ] Implementar validação anti-duplicidade (verificando hash de data, valor e descrição) para evitar registros repetidos ao reimportar faturas.
+- [ ] **Opção B — Automação em Tempo Real via Push Notification (Webhook)**
+  - [ ] Implementar geração e revogação de `API Key` pessoal por usuário para autenticação segura de dispositivos móveis.
+  - [ ] Criar endpoint `POST /webhooks/notificacao` protegido por middleware de `x-api-key`.
+  - [ ] Desenvolver parser (Regex) para extrair valor, estabelecimento e data a partir do texto das notificações bancárias (compatível com **Atalhos** no iOS e **MacroDroid/Tasker** no Android).
+
+---
+
+## 🧪 Fase 7: Testes, Documentação e Observabilidade
 
 > **Objetivo:** Manter o código testável, documentado e monitorado no Render.
 

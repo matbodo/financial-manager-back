@@ -19,6 +19,7 @@ model User {
   assinaturas   assinaturas[]
   gastos        gastos[]
   investimentos investimentos[]
+  categories    Category[]
   refresh_tokens RefreshToken[]
 
   @@map("usuarios")
@@ -69,4 +70,16 @@ model investimentos {
   usuarios   User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "investimentos_ibfk_1")
 
   @@index([user_id], map: "user_id")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String
+  color       String?
+  icon        String?
+  user_id     Int
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  created_at  DateTime  @default(now())
+
+  @@map("categories")
 }
