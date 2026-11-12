@@ -3,7 +3,10 @@ import { prisma } from "../server.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { refreshTokenSchema } from "../schemas/authSchema.js";
+import {
+  refreshTokenSchema,
+  resetPasswordSchema,
+} from "../schemas/authSchema.js";
 import { sendEmail } from "../utils/sendEmail.js";
 
 async function generateAndSaveRefreshToken(userId: number): Promise<string> {
@@ -234,6 +237,42 @@ export const AuthController = {
       return res
         .status(500)
         .json({ message: "Erro ao tentar enviar e-mail de recuperação" });
+    }
+  },
+
+  async resetPassword(req: Request, res: Response) {
+    try {
+      const { token, password } = req.body;
+
+      const user = await prisma.user.findFirst({
+        where: {
+          resetToken: token,
+          resetTokenExpires: {
+            gt: new Date(),
+          },
+        },
+      });
+
+      if (!user) {
+        return res.status(400).json({ message: "Token inválido ou expirado." });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          resetToken: null,
+          resetTokenExpires: null,
+        },
+      });
+
+      return res.status(200).json({ message: "Senha redefinida com sucesso" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Erro ao definir a senha" });
     }
   },
 };
