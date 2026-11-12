@@ -14,7 +14,7 @@ exports.GastosController = {
                 });
             }
             const { name, value, date } = validation.data;
-            const gastos = await server_js_1.prisma.gastos.create({
+            const expense = await server_js_1.prisma.expense.create({
                 data: {
                     name,
                     value,
@@ -22,7 +22,7 @@ exports.GastosController = {
                     user_id: req.user.id,
                 },
             });
-            return res.status(201).json(gastos);
+            return res.status(201).json(expense);
         }
         catch (error) {
             console.error(error);
@@ -31,12 +31,12 @@ exports.GastosController = {
     },
     async list(req, res) {
         try {
-            const gastos = await server_js_1.prisma.gastos.findMany({
+            const expense = await server_js_1.prisma.expense.findMany({
                 where: {
                     user_id: req.user.id,
                 },
             });
-            return res.status(200).json(gastos);
+            return res.status(200).json(expense);
         }
         catch (error) {
             return res.status(500).json({ message: "Erro interno do servidor" });
@@ -55,7 +55,7 @@ exports.GastosController = {
                     errors: validation.error.flatten().fieldErrors,
                 });
             }
-            const gastoExisting = await server_js_1.prisma.gastos.findFirst({
+            const gastoExisting = await server_js_1.prisma.expense.findFirst({
                 where: {
                     id: gastoId,
                     user_id: req.user.id,
@@ -65,7 +65,7 @@ exports.GastosController = {
                 return res.status(404).json({ message: "Gasto não encontrado" });
             }
             const { name, value, date } = validation.data;
-            const gastoUpdated = await server_js_1.prisma.gastos.update({
+            const gastoUpdated = await server_js_1.prisma.expense.update({
                 where: {
                     id: gastoExisting.id,
                 },
@@ -88,7 +88,7 @@ exports.GastosController = {
             if (Number.isNaN(gastoId)) {
                 return res.status(400).json({ message: "ID de gasto inválido" });
             }
-            const gasto = await server_js_1.prisma.gastos.findFirst({
+            const gasto = await server_js_1.prisma.expense.findFirst({
                 where: {
                     id: Number(req.params.id),
                     user_id: req.user.id,
@@ -97,7 +97,7 @@ exports.GastosController = {
             if (!gasto) {
                 return res.status(404).json({ message: "Gasto não encontrado" });
             }
-            await server_js_1.prisma.gastos.delete({
+            await server_js_1.prisma.expense.delete({
                 where: {
                     id: gasto.id,
                 },

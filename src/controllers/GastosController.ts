@@ -19,7 +19,7 @@ export const GastosController = {
 
       const { name, value, date } = validation.data;
 
-      const gastos = await prisma.gastos.create({
+      const expense = await prisma.expense.create({
         data: {
           name,
           value,
@@ -28,7 +28,7 @@ export const GastosController = {
         },
       });
 
-      return res.status(201).json(gastos);
+      return res.status(201).json(expense);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Erro interno do servidor" });
@@ -37,13 +37,13 @@ export const GastosController = {
 
   async list(req: Request, res: Response) {
     try {
-      const gastos = await prisma.gastos.findMany({
+      const expense = await prisma.expense.findMany({
         where: {
           user_id: req.user!.id,
         },
       });
 
-      return res.status(200).json(gastos);
+      return res.status(200).json(expense);
     } catch (error) {
       return res.status(500).json({ message: "Erro interno do servidor" });
     }
@@ -66,7 +66,7 @@ export const GastosController = {
         });
       }
 
-      const gastoExisting = await prisma.gastos.findFirst({
+      const gastoExisting = await prisma.expense.findFirst({
         where: {
           id: gastoId,
           user_id: req.user!.id,
@@ -79,7 +79,7 @@ export const GastosController = {
 
       const { name, value, date } = validation.data;
 
-      const gastoUpdated = await prisma.gastos.update({
+      const gastoUpdated = await prisma.expense.update({
         where: {
           id: gastoExisting.id,
         },
@@ -105,7 +105,7 @@ export const GastosController = {
         return res.status(400).json({ message: "ID de gasto inválido" });
       }
 
-      const gasto = await prisma.gastos.findFirst({
+      const gasto = await prisma.expense.findFirst({
         where: {
           id: Number(req.params.id),
           user_id: req.user!.id,
@@ -116,7 +116,7 @@ export const GastosController = {
         return res.status(404).json({ message: "Gasto não encontrado" });
       }
 
-      await prisma.gastos.delete({
+      await prisma.expense.delete({
         where: {
           id: gasto.id,
         },

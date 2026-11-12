@@ -19,7 +19,7 @@ export const InvestimentsController = {
 
       const { name, value, date } = validation.data;
 
-      const investiments = await prisma.investimentos.create({
+      const investiments = await prisma.investment.create({
         data: {
           name,
           value,
@@ -37,7 +37,7 @@ export const InvestimentsController = {
 
   async list(req: Request, res: Response) {
     try {
-      const investiments = await prisma.investimentos.findMany({
+      const investiments = await prisma.investment.findMany({
         where: {
           user_id: req.user!.id,
         },
@@ -68,7 +68,7 @@ export const InvestimentsController = {
         });
       }
 
-      const investimentExisting = await prisma.investimentos.findFirst({
+      const investimentExisting = await prisma.investment.findFirst({
         where: {
           id: investimentId,
           user_id: req.user!.id,
@@ -81,7 +81,7 @@ export const InvestimentsController = {
 
       const { name, value, date } = validation.data;
 
-      const investimentUpdated = await prisma.investimentos.update({
+      const investimentUpdated = await prisma.investment.update({
         where: {
           id: investimentExisting.id,
         },
@@ -106,7 +106,7 @@ export const InvestimentsController = {
         return res.status(400).json({ message: "ID de gasto inválido" });
       }
 
-      const investiment = await prisma.investimentos.findFirst({
+      const investiment = await prisma.investment.findFirst({
         where: {
           id: investimentId,
           user_id: req.user!.id,
@@ -117,7 +117,7 @@ export const InvestimentsController = {
         return res.status(404).json({ message: "Investimento não encontrado" });
       }
 
-      await prisma.investimentos.delete({
+      await prisma.investment.delete({
         where: {
           id: investiment.id,
         },

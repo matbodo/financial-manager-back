@@ -14,7 +14,7 @@ exports.InvestimentsController = {
                 });
             }
             const { name, value, date } = validation.data;
-            const investiments = await server_js_1.prisma.investimentos.create({
+            const investiments = await server_js_1.prisma.investment.create({
                 data: {
                     name,
                     value,
@@ -31,7 +31,7 @@ exports.InvestimentsController = {
     },
     async list(req, res) {
         try {
-            const investiments = await server_js_1.prisma.investimentos.findMany({
+            const investiments = await server_js_1.prisma.investment.findMany({
                 where: {
                     user_id: req.user.id,
                 },
@@ -57,7 +57,7 @@ exports.InvestimentsController = {
                     errors: validation.error.flatten().fieldErrors,
                 });
             }
-            const investimentExisting = await server_js_1.prisma.investimentos.findFirst({
+            const investimentExisting = await server_js_1.prisma.investment.findFirst({
                 where: {
                     id: investimentId,
                     user_id: req.user.id,
@@ -67,7 +67,7 @@ exports.InvestimentsController = {
                 return res.status(404).json({ message: "Investimento não encontrado" });
             }
             const { name, value, date } = validation.data;
-            const investimentUpdated = await server_js_1.prisma.investimentos.update({
+            const investimentUpdated = await server_js_1.prisma.investment.update({
                 where: {
                     id: investimentExisting.id,
                 },
@@ -89,7 +89,7 @@ exports.InvestimentsController = {
             if (Number.isNaN(investimentId)) {
                 return res.status(400).json({ message: "ID de gasto inválido" });
             }
-            const investiment = await server_js_1.prisma.investimentos.findFirst({
+            const investiment = await server_js_1.prisma.investment.findFirst({
                 where: {
                     id: investimentId,
                     user_id: req.user.id,
@@ -98,7 +98,7 @@ exports.InvestimentsController = {
             if (!investiment) {
                 return res.status(404).json({ message: "Investimento não encontrado" });
             }
-            await server_js_1.prisma.investimentos.delete({
+            await server_js_1.prisma.investment.delete({
                 where: {
                     id: investiment.id,
                 },

@@ -24,31 +24,31 @@ export const UserController = {
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
 
-    const assinaturas = await prisma.assinaturas.aggregate({
+    const signature = await prisma.signature.aggregate({
       where: { user_id: userId },
       _sum: { value: true },
     });
 
-    const investimentos = await prisma.investimentos.aggregate({
+    const investment = await prisma.investment.aggregate({
       where: { user_id: userId },
       _sum: { value: true },
     });
 
-    const gastos = await prisma.gastos.aggregate({
+    const expense = await prisma.expense.aggregate({
       where: { user_id: userId },
       _sum: { value: true },
     });
 
     const income = Number(user?.income) || 0;
-    const assinaturasTotal = Number(assinaturas._sum.value) || 0;
-    const investimentosTotal = Number(investimentos._sum.value) || 0;
-    const gastosTotal = Number(gastos._sum.value) || 0;
+    const assinaturasTotal = Number(signature._sum.value) || 0;
+    const investimentosTotal = Number(investment._sum.value) || 0;
+    const gastosTotal = Number(expense._sum.value) || 0;
 
     return res.status(200).json({
       income,
-      assinaturas: assinaturasTotal,
-      investimentos: investimentosTotal,
-      gastos: gastosTotal,
+      signature: assinaturasTotal,
+      investment: investimentosTotal,
+      expense: gastosTotal,
       totalGeral: assinaturasTotal + investimentosTotal + gastosTotal,
     });
   },

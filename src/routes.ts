@@ -1,23 +1,24 @@
 import { Router } from "express";
-import { AuthController } from "./controllers/AuthController.js";
 import { authMiddleware } from "./middlewares/AuthMiddleware.js";
 import { authLimiter } from "./middlewares/rateLimiter.js";
+import { AuthController } from "./controllers/AuthController.js";
 import { GastosController } from "./controllers/GastosController.js";
 import { SignaturesController } from "./controllers/SignaturesController.js";
 import { InvestimentsController } from "./controllers/InvestimentsController.js";
+import { CategoryController } from "./controllers/CategoryController.js";
 import { UserController } from "./controllers/UserController.js";
+import { createGastoSchema, updateGastoSchema } from "./schemas/gastoSchema.js";
 import { validateSchema } from "./schemas/validateSchema.js";
+import { categorySchema } from "./schemas/categorySchema.js";
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
 } from "./schemas/authSchema.js";
-
 import {
   registerSchema,
   loginSchema,
   refreshTokenSchema,
 } from "./schemas/authSchema.js";
-import { createGastoSchema, updateGastoSchema } from "./schemas/gastoSchema.js";
 
 const router = Router();
 
@@ -79,6 +80,21 @@ router.put(
   GastosController.create,
 );
 router.delete("/gastos/:id", authMiddleware, GastosController.delete);
+
+router.post(
+  "/categorias",
+  authMiddleware,
+  validateSchema(categorySchema),
+  CategoryController.create,
+);
+router.get("/categorias", authMiddleware, CategoryController.list);
+router.put(
+  "/categorias/:id",
+  authMiddleware,
+  validateSchema(categorySchema),
+  CategoryController.update,
+);
+router.delete("/categorias/:id", authMiddleware, CategoryController.delete);
 
 router.get("/resumo", authMiddleware, UserController.getSummary);
 

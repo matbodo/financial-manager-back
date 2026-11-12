@@ -14,7 +14,7 @@ exports.SignaturesController = {
                 });
             }
             const { name, value, date } = validation.data;
-            const signatures = await server_js_1.prisma.assinaturas.create({
+            const signature = await server_js_1.prisma.signature.create({
                 data: {
                     name,
                     value,
@@ -22,7 +22,7 @@ exports.SignaturesController = {
                     user_id: req.user.id,
                 },
             });
-            return res.status(201).json(signatures);
+            return res.status(201).json(signature);
         }
         catch (error) {
             console.error(error);
@@ -31,12 +31,12 @@ exports.SignaturesController = {
     },
     async list(req, res) {
         try {
-            const signatures = await server_js_1.prisma.assinaturas.findMany({
+            const signature = await server_js_1.prisma.signature.findMany({
                 where: {
                     user_id: req.user.id,
                 },
             });
-            return res.status(200).json(signatures);
+            return res.status(200).json(signature);
         }
         catch (error) {
             return res.status(500).json({ message: "Erro interno do servidor" });
@@ -55,7 +55,7 @@ exports.SignaturesController = {
                     error: validation.error.flatten().fieldErrors,
                 });
             }
-            const signatureExisting = await server_js_1.prisma.assinaturas.findFirst({
+            const signatureExisting = await server_js_1.prisma.signature.findFirst({
                 where: {
                     id: signatureId,
                     user_id: req.user.id,
@@ -65,7 +65,7 @@ exports.SignaturesController = {
                 return res.status(404).json({ message: "Assinatura não encontrada" });
             }
             const { name, value, date } = validation.data;
-            const signatureUpdated = await server_js_1.prisma.assinaturas.update({
+            const signatureUpdated = await server_js_1.prisma.signature.update({
                 where: {
                     id: signatureExisting.id,
                 },
@@ -88,7 +88,7 @@ exports.SignaturesController = {
             if (Number.isNaN(signatureId)) {
                 return res.status(400).json({ message: "ID de assinatura inválido" });
             }
-            const signature = await server_js_1.prisma.assinaturas.findFirst({
+            const signature = await server_js_1.prisma.signature.findFirst({
                 where: {
                     id: signatureId,
                     user_id: req.user.id,
@@ -97,7 +97,7 @@ exports.SignaturesController = {
             if (!signature) {
                 return res.status(404).json({ message: "Assinatura não encontrada" });
             }
-            await server_js_1.prisma.assinaturas.delete({
+            await server_js_1.prisma.signature.delete({
                 where: {
                     id: signature.id,
                 },

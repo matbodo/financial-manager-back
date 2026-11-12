@@ -16,11 +16,11 @@ model User {
   resetToken          String?         @db.VarChar(255)
   resetTokenExpires   DateTime?       @db.Timestamp(0)
 
-  assinaturas   assinaturas[]
-  gastos        gastos[]
-  investimentos investimentos[]
-  categories    Category[]
-  refresh_tokens RefreshToken[]
+  signatures      Signature[]
+  expenses        Expense[]
+  investments     Investment[]
+  categories      Category[]
+  refresh_tokens  RefreshToken[]
 
   @@map("usuarios")
 }
@@ -37,49 +37,62 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
-model assinaturas {
+model Signature {
   id          Int       @id @default(autoincrement())
   name        String    @db.VarChar(100)
   value       Decimal   @db.Decimal(10, 2)
   user_id     Int
   created_at  DateTime? @default(now()) @db.Timestamp(0)
   billing_day Int?
-  usuarios    User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "assinaturas_ibfk_1")
+  usuarios    User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "signatures_ibfk_1")
   
-  @@index([user_id], map: "user_id")
-}
-
-model gastos {
-  id         Int       @id @default(autoincrement())
-  name       String    @db.VarChar(100)
-  value      Decimal   @db.Decimal(10, 2)
-  user_id    Int
-  created_at DateTime? @default(now()) @db.Timestamp(0)
-  usuarios   User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "gastos_ibfk_1")
+  category_id Int?
+  category    Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
 
   @@index([user_id], map: "user_id")
 }
 
-model investimentos {
+model Expense {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(100)
+  value       Decimal   @db.Decimal(10, 2)
+  user_id     Int
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+  usuarios    User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "expenses_ibfk_1")
+
+  category_id Int?
+  category    Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id], map: "user_id")
+}
+
+model Investment {
   id         Int       @id @default(autoincrement())
   name       String    @db.VarChar(100)
   value      Decimal   @db.Decimal(10, 2)
   user_id    Int
   created_at DateTime? @default(now()) @db.Timestamp(0)
   date       DateTime? @db.Date
-  usuarios   User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "investimentos_ibfk_1")
+  usuarios   User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "investments_ibfk_1")
+  
+  category_id Int?
+  category    Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
 
   @@index([user_id], map: "user_id")
 }
 
 model Category {
-  id          Int       @id @default(autoincrement())
-  name        String
-  color       String?
-  icon        String?
-  user_id     Int
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  created_at  DateTime  @default(now())
+  id            Int       @id @default(autoincrement())
+  name          String
+  color         String?
+  icon          String?
+  user_id       Int
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at    DateTime  @default(now())
+
+  expenses      Expense[]
+  signatures    Signature[]
+  investments   Investment[]
 
   @@map("categories")
 }
