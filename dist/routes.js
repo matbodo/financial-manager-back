@@ -15,22 +15,92 @@ const gastoSchema_js_1 = require("./schemas/gastoSchema.js");
 const router = (0, express_1.Router)();
 exports.router = router;
 router.get("/health", (_req, res) => {
-    res.status(200).json({ status: "ok" });
+  res.status(200).json({ status: "ok" });
 });
-router.post("/login", (0, validateSchema_js_1.validateSchema)(authSchema_js_2.loginSchema), AuthController_js_1.AuthController.login);
-router.post("/register", (0, validateSchema_js_1.validateSchema)(authSchema_js_2.registerSchema), AuthController_js_1.AuthController.register);
-router.post("/forgot-password", (0, validateSchema_js_1.validateSchema)(authSchema_js_1.forgotPasswordSchema), AuthController_js_1.AuthController.forgortPassword);
-router.patch("/usuarios/renda", AuthMiddleware_js_1.authMiddleware, UserController_js_1.UserController.updateIncome);
-router.post("/assinaturas", AuthMiddleware_js_1.authMiddleware, SignaturesController_js_1.SignaturesController.create);
-router.get("/assinaturas", AuthMiddleware_js_1.authMiddleware, SignaturesController_js_1.SignaturesController.list);
-router.put("/assinaturas/:id", AuthMiddleware_js_1.authMiddleware, SignaturesController_js_1.SignaturesController.update);
-router.delete("/assinaturas/:id", AuthMiddleware_js_1.authMiddleware, SignaturesController_js_1.SignaturesController.delete);
-router.post("/investimentos", AuthMiddleware_js_1.authMiddleware, InvestimentsController_js_1.InvestimentsController.create);
-router.get("/investimentos", AuthMiddleware_js_1.authMiddleware, InvestimentsController_js_1.InvestimentsController.list);
-router.put("/investimentos/:id", AuthMiddleware_js_1.authMiddleware, InvestimentsController_js_1.InvestimentsController.update);
-router.delete("/investimentos/:id", AuthMiddleware_js_1.authMiddleware, InvestimentsController_js_1.InvestimentsController.delete);
-router.post("/gastos", AuthMiddleware_js_1.authMiddleware, (0, validateSchema_js_1.validateSchema)(gastoSchema_js_1.createGastoSchema), GastosController_js_1.GastosController.create);
-router.get("/gastos", AuthMiddleware_js_1.authMiddleware, GastosController_js_1.GastosController.list);
-router.put("/gastos/:id", AuthMiddleware_js_1.authMiddleware, (0, validateSchema_js_1.validateSchema)(gastoSchema_js_1.createGastoSchema), GastosController_js_1.GastosController.create);
-router.delete("/gastos/:id", AuthMiddleware_js_1.authMiddleware, GastosController_js_1.GastosController.delete);
-router.get("/resumo", AuthMiddleware_js_1.authMiddleware, UserController_js_1.UserController.getSummary);
+router.post(
+  "/login",
+  (0, validateSchema_js_1.validateSchema)(authSchema_js_2.loginSchema),
+  AuthController_js_1.AuthController.login,
+);
+router.post(
+  "/register",
+  (0, validateSchema_js_1.validateSchema)(authSchema_js_2.registerSchema),
+  AuthController_js_1.AuthController.register,
+);
+router.post(
+  "/forgot-password",
+  (0, validateSchema_js_1.validateSchema)(authSchema_js_1.forgotPasswordSchema),
+  AuthController_js_1.AuthController.forgotPassword,
+);
+router.patch(
+  "/usuarios/renda",
+  AuthMiddleware_js_1.authMiddleware,
+  UserController_js_1.UserController.updateIncome,
+);
+router.post(
+  "/assinaturas",
+  AuthMiddleware_js_1.authMiddleware,
+  SignaturesController_js_1.SignaturesController.create,
+);
+router.get(
+  "/assinaturas",
+  AuthMiddleware_js_1.authMiddleware,
+  SignaturesController_js_1.SignaturesController.list,
+);
+router.put(
+  "/assinaturas/:id",
+  AuthMiddleware_js_1.authMiddleware,
+  SignaturesController_js_1.SignaturesController.update,
+);
+router.delete(
+  "/assinaturas/:id",
+  AuthMiddleware_js_1.authMiddleware,
+  SignaturesController_js_1.SignaturesController.delete,
+);
+router.post(
+  "/investimentos",
+  AuthMiddleware_js_1.authMiddleware,
+  InvestimentsController_js_1.InvestimentsController.create,
+);
+router.get(
+  "/investimentos",
+  AuthMiddleware_js_1.authMiddleware,
+  InvestimentsController_js_1.InvestimentsController.list,
+);
+router.put(
+  "/investimentos/:id",
+  AuthMiddleware_js_1.authMiddleware,
+  InvestimentsController_js_1.InvestimentsController.update,
+);
+router.delete(
+  "/investimentos/:id",
+  AuthMiddleware_js_1.authMiddleware,
+  InvestimentsController_js_1.InvestimentsController.delete,
+);
+router.post(
+  "/gastos",
+  AuthMiddleware_js_1.authMiddleware,
+  (0, validateSchema_js_1.validateSchema)(gastoSchema_js_1.createGastoSchema),
+  GastosController_js_1.GastosController.create,
+);
+router.get(
+  "/gastos",
+  AuthMiddleware_js_1.authMiddleware,
+  GastosController_js_1.GastosController.list,
+);
+router.put(
+  "/gastos/:id",
+  AuthMiddleware_js_1.authMiddleware,
+  (0, validateSchema_js_1.validateSchema)(gastoSchema_js_1.createGastoSchema),
+  GastosController_js_1.GastosController.create,
+);
+router.delete(
+  "/gastos/:id",
+  AuthMiddleware_js_1.authMiddleware,
+  GastosController_js_1.GastosController.delete,
+);
+router.get(
+  "/resumo",
+  AuthMiddleware_js_1.authMiddleware,
+  UserController_js_1.UserController.getSummary,
+);

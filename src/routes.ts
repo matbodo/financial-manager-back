@@ -30,7 +30,7 @@ router.post(
 router.post(
   "/forgot-password",
   validateSchema(forgotPasswordSchema),
-  AuthController.forgortPassword,
+  AuthController.forgotPassword,
 );
 
 router.patch("/usuarios/renda", authMiddleware, UserController.updateIncome);

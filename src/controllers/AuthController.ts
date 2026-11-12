@@ -187,11 +187,11 @@ export const AuthController = {
     }
   },
 
-  async forgortPassword(req: Request, res: Response) {
+  async forgotPassword(req: Request, res: Response) {
     try {
       const { email } = req.body;
 
-      const user = await prisma.user.findUnique({ where: email });
+      const user = await prisma.user.findUnique({ where: { email } });
 
       if (!user) {
         return res.status(200).json({
