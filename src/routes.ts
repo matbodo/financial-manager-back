@@ -6,6 +6,7 @@ import { GastosController } from "./controllers/GastosController.js";
 import { SignaturesController } from "./controllers/SignaturesController.js";
 import { InvestimentsController } from "./controllers/InvestimentsController.js";
 import { CategoryController } from "./controllers/CategoryController.js";
+import { BudgetController } from "./controllers/BudgetController.js";
 import { UserController } from "./controllers/UserController.js";
 import { createGastoSchema, updateGastoSchema } from "./schemas/gastoSchema.js";
 import { validateSchema } from "./schemas/validateSchema.js";
@@ -49,6 +50,9 @@ router.post(
   validateSchema(resetPasswordSchema),
   AuthController.resetPassword,
 );
+
+router.post("/budgets", authMiddleware, BudgetController.create);
+router.get("/budgets/status", authMiddleware, BudgetController.getStatus);
 
 router.patch("/usuarios/renda", authMiddleware, UserController.updateIncome);
 

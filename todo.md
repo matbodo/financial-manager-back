@@ -26,10 +26,10 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 
 > **Objetivo:** Dar flexibilidade para o usuário organizar e consultar suas finanças com precisão.
 
-- [ ] **Gerenciamento de Categorias (CRUD)**
-  - [ ] Criar tabela `Category` no `schema.prisma` com campos: `id`, `name`, `color`, `icon`, `userId`.
-  - [ ] Vincular `Gasto` e `Renda` às categorias.
-  - [ ] Implementar rotas `/categorias` (`GET`, `POST`, `PUT`, `DELETE`).
+- [x] **Gerenciamento de Categorias (CRUD)**
+  - [x] Criar tabela `Category` no `schema.prisma` com campos: `id`, `name`, `color`, `icon`, `userId`.
+  - [x] Vincular `Gasto` e `Renda` às categorias.
+  - [x] Implementar rotas `/categorias` (`GET`, `POST`, `PUT`, `DELETE`).
 - [ ] **Orçamentos Mensais (Metas por Categoria)**
   - [ ] Criar tabela `Budget` no `schema.prisma` com limite de gastos estipulado pelo usuário.
   - [ ] Criar rota de consulta de status do orçamento (`/budgets/status`) que calcula gastos atuais vs. limite definido.

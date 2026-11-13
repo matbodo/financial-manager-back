@@ -16,11 +16,12 @@ model User {
   resetToken          String?         @db.VarChar(255)
   resetTokenExpires   DateTime?       @db.Timestamp(0)
 
-  signatures      Signature[]
-  expenses        Expense[]
-  investments     Investment[]
-  categories      Category[]
-  refresh_tokens  RefreshToken[]
+  signatures          Signature[]
+  expenses            Expense[]
+  investments         Investment[]
+  categories          Category[]
+  budgets             Budget[]
+  refresh_tokens      RefreshToken[]
 
   @@map("usuarios")
 }
@@ -67,13 +68,13 @@ model Expense {
 }
 
 model Investment {
-  id         Int       @id @default(autoincrement())
-  name       String    @db.VarChar(100)
-  value      Decimal   @db.Decimal(10, 2)
-  user_id    Int
-  created_at DateTime? @default(now()) @db.Timestamp(0)
-  date       DateTime? @db.Date
-  usuarios   User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "investments_ibfk_1")
+  id         Int        @id @default(autoincrement())
+  name       String     @db.VarChar(100)
+  value      Decimal    @db.Decimal(10, 2)
+  user_id    Int  
+  created_at DateTime?  @default(now()) @db.Timestamp(0)
+  date       DateTime?  @db.Date
+  usuarios   User       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "investments_ibfk_1")
   
   category_id Int?
   category    Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
@@ -93,6 +94,24 @@ model Category {
   expenses      Expense[]
   signatures    Signature[]
   investments   Investment[]
+  budgets       Budget[]
 
   @@map("categories")
+}
+
+model Budget {
+  id          Int       @id @default(autoincrement())
+  amount      Decimal   @db.Decimal(10, 2)
+  month       Int
+  year        Int
+  user_id     Int
+  category_id Int
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+
+  user      User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  category  Category    @relation(fields: [category_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, category_id, month, year])
+  @@index([user_id], map: "user_id_budgets")
+  @@map("budgets")
 }
