@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "./middlewares/AuthMiddleware.js";
 import { authLimiter } from "./middlewares/rateLimiter.js";
 import { AuthController } from "./controllers/AuthController.js";
-import { GastosController } from "./controllers/GastosController.js";
+import { ExpensesController } from "./controllers/ExpensesController.js";
 import { SignaturesController } from "./controllers/SignaturesController.js";
 import { InvestimentsController } from "./controllers/InvestimentsController.js";
 import { CategoryController } from "./controllers/CategoryController.js";
@@ -74,16 +74,16 @@ router.post(
   "/gastos",
   authMiddleware,
   validateSchema(createGastoSchema),
-  GastosController.create,
+  ExpensesController.create,
 );
-router.get("/gastos", authMiddleware, GastosController.list);
+router.get("/gastos", authMiddleware, ExpensesController.list);
 router.put(
   "/gastos/:id",
   authMiddleware,
   validateSchema(createGastoSchema),
-  GastosController.create,
+  ExpensesController.create,
 );
-router.delete("/gastos/:id", authMiddleware, GastosController.delete);
+router.delete("/gastos/:id", authMiddleware, ExpensesController.delete);
 
 router.post(
   "/categorias",

@@ -4,6 +4,10 @@ import {
   updateInvestimentSchema,
   createInvestimentSchema,
 } from "../schemas/investimentSchema.js";
+import {
+  buildListQuery,
+  formatPaginationResponse,
+} from "../utils/buildListQuery.js";
 
 export const InvestimentsController = {
   async create(req: Request, res: Response) {
@@ -37,14 +41,35 @@ export const InvestimentsController = {
 
   async list(req: Request, res: Response) {
     try {
-      const investiments = await prisma.investment.findMany({
-        where: {
-          user_id: req.user!.id,
-        },
+      const query = buildListQuery(req, {
+        userId: req.user!.id,
+        allowSortFields: ["date", "created_at", "value", "name"],
+        dateField: "date",
       });
 
-      return res.status(200).json(investiments);
+      const [investments, totalItems] = await Promise.all([
+        prisma.investment.findMany({
+          where: query.where,
+          skip: query.skip,
+          take: query.take,
+          orderBy: query.orderBy,
+          include: { category: true },
+        }),
+        prisma.investment.count({ where: query.where }),
+      ]);
+
+      return res
+        .status(200)
+        .json(
+          formatPaginationResponse(
+            investments,
+            totalItems,
+            query.pagination.page,
+            query.pagination.limit,
+          ),
+        );
     } catch (error) {
+      console.error(error);
       return res.status(500).json({ message: "Erro interno do servidor" });
     }
   },

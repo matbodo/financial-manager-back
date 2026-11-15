@@ -4,6 +4,10 @@ import {
   updateSignatureSchema,
   createSignatureSchema,
 } from "../schemas/signatureSchema.js";
+import {
+  buildListQuery,
+  formatPaginationResponse,
+} from "../utils/buildListQuery.js";
 
 export const SignaturesController = {
   async create(req: Request, res: Response) {
@@ -37,14 +41,35 @@ export const SignaturesController = {
 
   async list(req: Request, res: Response) {
     try {
-      const signature = await prisma.signature.findMany({
-        where: {
-          user_id: req.user!.id,
-        },
+      const query = buildListQuery(req, {
+        userId: req.user!.id,
+        allowSortFields: ["date", "created_at", "value", "name"],
+        dateField: "date",
       });
 
-      return res.status(200).json(signature);
+      const [signatures, totalItems] = await Promise.all([
+        prisma.signature.findMany({
+          where: query.where,
+          skip: query.skip,
+          take: query.take,
+          orderBy: query.orderBy,
+          include: { category: true },
+        }),
+        prisma.signature.count({ where: query.where }),
+      ]);
+
+      return res
+        .status(200)
+        .json(
+          formatPaginationResponse(
+            signatures,
+            totalItems,
+            query.pagination.page,
+            query.pagination.limit,
+          ),
+        );
     } catch (error) {
+      console.error(error);
       return res.status(500).json({ message: "Erro interno do servidor" });
     }
   },

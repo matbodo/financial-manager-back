@@ -4,8 +4,12 @@ import {
   createGastoSchema,
   updateGastoSchema,
 } from "../schemas/gastoSchema.js";
+import {
+  buildListQuery,
+  formatPaginationResponse,
+} from "../utils/buildListQuery.js";
 
-export const GastosController = {
+export const ExpensesController = {
   async create(req: Request, res: Response) {
     try {
       const validation = createGastoSchema.safeParse(req.body);
@@ -37,14 +41,35 @@ export const GastosController = {
 
   async list(req: Request, res: Response) {
     try {
-      const expense = await prisma.expense.findMany({
-        where: {
-          user_id: req.user!.id,
-        },
+      const query = buildListQuery(req, {
+        userId: req.user!.id,
+        allowSortFields: ["date", "created_at", "value", "name"],
+        dateField: "date",
       });
 
-      return res.status(200).json(expense);
+      const [expenses, totalItems] = await Promise.all([
+        prisma.expense.findMany({
+          where: query.where,
+          skip: query.skip,
+          take: query.take,
+          orderBy: query.orderBy,
+          include: { category: true },
+        }),
+        prisma.expense.count({ where: query.where }),
+      ]);
+
+      return res
+        .status(200)
+        .json(
+          formatPaginationResponse(
+            expenses,
+            totalItems,
+            query.pagination.page,
+            query.pagination.limit,
+          ),
+        );
     } catch (error) {
+      console.error(error);
       return res.status(500).json({ message: "Erro interno do servidor" });
     }
   },

@@ -1,14 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryController = void 0;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const server_1 = require("../server");
 class CategoryController {
     static async create(req, res) {
         try {
             const { name, color, icon } = req.body;
-            const userId = req.userId;
-            const category = await prisma.category.create({
+            const userId = req.user.id;
+            const category = await server_1.prisma.category.create({
                 data: {
                     name,
                     color,
@@ -25,8 +24,8 @@ class CategoryController {
     }
     static async list(req, res) {
         try {
-            const userId = req.userId;
-            const categories = await prisma.category.findMany({
+            const userId = req.user.id;
+            const categories = await server_1.prisma.category.findMany({
                 where: { user_id: userId },
             });
             return res.status(200).json(categories);
@@ -40,18 +39,18 @@ class CategoryController {
         try {
             const { id } = req.params;
             const { name, color, icon } = req.body;
-            const userId = req.userId;
-            const existingCategory = await prisma.user.findFirst({
+            const userId = req.user.id;
+            const existingCategory = await server_1.prisma.category.findFirst({
                 where: { id: Number(id), user_id: userId },
             });
             if (!existingCategory) {
                 return res.status(404).json({ message: "Categoria não encontrada" });
             }
-            const updatedCategory = await prisma.category.update({
+            const updatedCategory = await server_1.prisma.category.update({
                 where: { id: Number(id) },
                 data: { name, color, icon },
             });
-            return res.status(201).json(updatedCategory);
+            return res.status(200).json(updatedCategory);
         }
         catch (error) {
             console.error(error);
@@ -61,14 +60,14 @@ class CategoryController {
     static async delete(req, res) {
         try {
             const { id } = req.params;
-            const userId = req.userId;
-            const existingCategory = await prisma.category.findFirst({
+            const userId = req.user.id;
+            const existingCategory = await server_1.prisma.category.findFirst({
                 where: { id: Number(id), user_id: userId },
             });
             if (!existingCategory) {
                 return res.status(404).json({ message: "Categoria nao encontrada" });
             }
-            await prisma.category.delete({
+            await server_1.prisma.category.delete({
                 where: { id: Number(id) },
             });
             return res

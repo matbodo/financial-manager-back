@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvestimentsController = void 0;
 const server_js_1 = require("../server.js");
 const investimentSchema_js_1 = require("../schemas/investimentSchema.js");
+const buildListQuery_js_1 = require("../utils/buildListQuery.js");
 exports.InvestimentsController = {
     async create(req, res) {
         try {
@@ -31,14 +32,27 @@ exports.InvestimentsController = {
     },
     async list(req, res) {
         try {
-            const investiments = await server_js_1.prisma.investment.findMany({
-                where: {
-                    user_id: req.user.id,
-                },
+            const query = (0, buildListQuery_js_1.buildListQuery)(req, {
+                userId: req.user.id,
+                allowSortFields: ["date", "created_at", "value", "name"],
+                dateField: "date",
             });
-            return res.status(200).json(investiments);
+            const [investments, totalItems] = await Promise.all([
+                server_js_1.prisma.investment.findMany({
+                    where: query.where,
+                    skip: query.skip,
+                    take: query.take,
+                    orderBy: query.orderBy,
+                    include: { category: true },
+                }),
+                server_js_1.prisma.investment.count({ where: query.where }),
+            ]);
+            return res
+                .status(200)
+                .json((0, buildListQuery_js_1.formatPaginationResponse)(investments, totalItems, query.pagination.page, query.pagination.limit));
         }
         catch (error) {
+            console.error(error);
             return res.status(500).json({ message: "Erro interno do servidor" });
         }
     },
