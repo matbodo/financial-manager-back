@@ -21,12 +21,14 @@ export const SignaturesController = {
         });
       }
 
-      const { name, value, date } = validation.data;
+      const { name, value, billing_day, category_id, date } = validation.data;
 
       const signature = await prisma.signature.create({
         data: {
           name,
           value,
+          billing_day,
+          category_id,
           date: date ? new Date(date) : new Date(),
           user_id: req.user!.id,
         },

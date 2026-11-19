@@ -2,7 +2,7 @@ import { Request } from "express";
 import { totalmem } from "node:os";
 
 interface BuildQueryOptions {
-  userId: Number;
+  userId: number;
   allowSortFields: string[];
   dateField?: "created_at" | "date";
 }

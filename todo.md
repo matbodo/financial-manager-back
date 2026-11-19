@@ -33,8 +33,8 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 - [x] **Orçamentos Mensais (Metas por Categoria)**
   - [x] Criar tabela `Budget` no `schema.prisma` com limite de gastos estipulado pelo usuário.
   - [x] Criar rota de consulta de status do orçamento (`/budgets/status`) que calcula gastos atuais vs. limite definido.
-- [ ] **Filtros Avançados e Paginação**
-  - [ ] Atualizar rotas de listagem (`/gastos`, `/investimentos`, `/assinaturas`) para suportar _query params_:
+- [x] **Filtros Avançados e Paginação**
+  - [x] Atualizar rotas de listagem (`/gastos`, `/investimentos`, `/assinaturas`) para suportar _query params_:
     - `page` e `limit` (paginação de resultados).
     - `startDate` e `endDate` (filtro por intervalo de datas).
     - `categoryId` (filtro por categoria específica).
