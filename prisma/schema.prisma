@@ -46,6 +46,7 @@ model Signature {
   user_id     Int
   created_at  DateTime? @default(now()) @db.Timestamp(0)
   billing_day Int?
+  active      Boolean   @default(true) 
   usuarios    User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "signatures_ibfk_1")
   
   category_id Int?

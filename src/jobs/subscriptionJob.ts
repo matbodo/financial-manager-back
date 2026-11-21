@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { prisma } from "../server.ts";
+import { prisma } from "../server";
 
 export async function processRecurringSubscription() {
   try {
@@ -15,9 +15,12 @@ export async function processRecurringSubscription() {
     const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
 
     const dueSignatures = await prisma.signature.findMany({
-      where: isLastDayOfMonth
-        ? { billing_day: { gte: currentDay } }
-        : { billing_day: currentDay },
+      where: {
+        active: true,
+        ...(isLastDayOfMonth
+          ? { billing_day: { gte: currentDay } }
+          : { billing_day: currentDay }),
+      },
     });
 
     if (dueSignatures.length === 0) {

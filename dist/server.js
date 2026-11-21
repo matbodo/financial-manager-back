@@ -7,9 +7,10 @@ exports.prisma = void 0;
 require("dotenv/config");
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
+const routes_js_1 = require("./routes.js");
 const client_1 = require("@prisma/client");
 const adapter_mariadb_1 = require("@prisma/adapter-mariadb");
-const routes_js_1 = require("./routes.js");
+const subscriptionJob_js_1 = require("./jobs/subscriptionJob.js");
 if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET não configurado");
 }
@@ -19,11 +20,13 @@ if (!process.env.DATABASE_URL) {
 const databaseUrl = new URL(process.env.DATABASE_URL);
 const adapter = new adapter_mariadb_1.PrismaMariaDb({
     host: databaseUrl.hostname,
-    port: Number(databaseUrl.port || 3306),
     user: decodeURIComponent(databaseUrl.username),
     password: decodeURIComponent(databaseUrl.password),
     database: databaseUrl.pathname.slice(1),
+    port: Number(databaseUrl.port || 3306),
     connectionLimit: 5,
+    acquireTimeout: 30000,
+    connectTimeout: 30000,
 });
 const prisma = new client_1.PrismaClient({ adapter });
 exports.prisma = prisma;
@@ -37,4 +40,8 @@ app.use(routes_js_1.router);
 const port = Number(process.env.PORT || 3000);
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
+});
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+    (0, subscriptionJob_js_1.startSubscriptionJob)();
 });

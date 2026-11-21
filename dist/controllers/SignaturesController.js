@@ -14,11 +14,13 @@ exports.SignaturesController = {
                     error: validation.error.flatten().fieldErrors,
                 });
             }
-            const { name, value, date } = validation.data;
+            const { name, value, billing_day, category_id, date } = validation.data;
             const signature = await server_js_1.prisma.signature.create({
                 data: {
                     name,
                     value,
+                    billing_day,
+                    category_id,
                     date: date ? new Date(date) : new Date(),
                     user_id: req.user.id,
                 },
@@ -78,7 +80,7 @@ exports.SignaturesController = {
             if (!signatureExisting) {
                 return res.status(404).json({ message: "Assinatura não encontrada" });
             }
-            const { name, value, date } = validation.data;
+            const { name, value, active, category_id, billing_day, date } = validation.data;
             const signatureUpdated = await server_js_1.prisma.signature.update({
                 where: {
                     id: signatureExisting.id,
@@ -86,6 +88,8 @@ exports.SignaturesController = {
                 data: {
                     ...(name !== undefined && { name }),
                     ...(value !== undefined && { value }),
+                    ...(active !== undefined && { active }),
+                    ...(category_id !== undefined && { category_id }),
                     ...(date !== undefined && { date: new Date(date) }),
                 },
             });

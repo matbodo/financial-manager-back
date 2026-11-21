@@ -9,6 +9,7 @@ export const createSignatureSchema = z.object({
     .min(1, "O dia de cobrança deve ser entre 1 e 31")
     .max(31, "O dia de cobrança deve ser entre 1 e 31"),
   category_id: z.number().int().optional(),
+  active: z.boolean().optional(),
   date: z.string().datetime({ message: "Data inválida" }).optional(),
 });
 

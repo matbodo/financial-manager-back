@@ -104,7 +104,8 @@ export const SignaturesController = {
         return res.status(404).json({ message: "Assinatura não encontrada" });
       }
 
-      const { name, value, date } = validation.data;
+      const { name, value, active, category_id, billing_day, date } =
+        validation.data;
 
       const signatureUpdated = await prisma.signature.update({
         where: {
@@ -113,6 +114,8 @@ export const SignaturesController = {
         data: {
           ...(name !== undefined && { name }),
           ...(value !== undefined && { value }),
+          ...(active !== undefined && { active }),
+          ...(category_id !== undefined && { category_id }),
           ...(date !== undefined && { date: new Date(date) }),
         },
       });
