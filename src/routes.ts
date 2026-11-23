@@ -6,6 +6,7 @@ import { ExpensesController } from "./controllers/ExpensesController.js";
 import { SignaturesController } from "./controllers/SignaturesController.js";
 import { InvestimentsController } from "./controllers/InvestimentsController.js";
 import { CategoryController } from "./controllers/CategoryController.js";
+import { SummaryController } from "./controllers/SummaryController.js";
 import { BudgetController } from "./controllers/BudgetController.js";
 import { UserController } from "./controllers/UserController.js";
 import { createGastoSchema, updateGastoSchema } from "./schemas/gastoSchema.js";

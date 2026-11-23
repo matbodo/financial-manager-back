@@ -46,9 +46,9 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 
 > **Objetivo:** Automatizar tarefas repetitivas e garantir atualização em tempo real sem intervenção manual.
 
-- [ ] **Processamento de Assinaturas Recorrentes**
-  - [ ] Integrar biblioteca de agendamento de tarefas (`node-cron`).
-  - [ ] Criar rotina diária (executada à meia-noite) que verifica assinaturas ativas com vencimento no dia e lança o valor automaticamente na tabela de `Gasto`.
+- [x] **Processamento de Assinaturas Recorrentes**
+  - [x] Integrar biblioteca de agendamento de tarefas (`node-cron`).
+  - [x] Criar rotina diária (executada à meia-noite) que verifica assinaturas ativas com vencimento no dia e lança o valor automaticamente na tabela de `Gasto`.
 - [ ] **Notificações por E-mail / Push**
   - [ ] Enviar lembretes prévios de vencimento de assinaturas e faturas ativas 3 dias antes do vencimento.
 
