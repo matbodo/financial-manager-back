@@ -1,17 +1,13 @@
 import type { Request, Response } from "express";
 import { prisma } from "../server.js";
+import ca from "zod/v4/locales/ca.cjs";
 
 export const SummaryController = {
   async analytical(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
 
-      const now = new Date();
-      const spDate = new Date(
-        now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }),
-      );
-
-      const month = Number(req.query.month) || spDate.getMonth() + 1; // 1 a 12
+      const month = Number(req.query.month) || spDate.getMonth() + 1;
       const year = Number(req.query.year) || spDate.getFullYear();
 
       const startOfCurrentMonth = new Date(year, month - 1, 1, 0, 0, 0);
@@ -22,7 +18,6 @@ export const SummaryController = {
       const startOfPrevMonth = new Date(prevYear, prevMonth - 1, 1, 0, 0, 0);
       const endOfPrevMonth = new Date(prevYear, prevMonth, 0, 23, 59, 59, 999);
 
-      // 2. Busca todos os dados necessários em paralelo no banco
       const [
         currentExpenses,
         prevExpensesAgg,
@@ -30,7 +25,6 @@ export const SummaryController = {
         activeSignaturesAgg,
         budgets,
       ] = await Promise.all([
-        // Gastos detalhados do mês (com categoria para montar o gráfico)
         prisma.expense.findMany({
           where: {
             user_id: userId,
@@ -39,7 +33,6 @@ export const SummaryController = {
           include: { category: true },
         }),
 
-        // Soma total dos gastos do mês anterior (usando aggregate direto no MySQL)
         prisma.expense.aggregate({
           where: {
             user_id: userId,
@@ -48,7 +41,6 @@ export const SummaryController = {
           _sum: { value: true },
         }),
 
-        // Soma total dos investimentos no mês atual
         prisma.investment.aggregate({
           where: {
             user_id: userId,
@@ -57,7 +49,6 @@ export const SummaryController = {
           _sum: { value: true },
         }),
 
-        // Custo fixo mensal de todas as assinaturas ativas
         prisma.signature.aggregate({
           where: {
             user_id: userId,
@@ -67,7 +58,6 @@ export const SummaryController = {
           _count: { id: true },
         }),
 
-        // Orçamentos definidos para o mês
         prisma.budget.findMany({
           where: {
             user_id: userId,
@@ -77,7 +67,6 @@ export const SummaryController = {
         }),
       ]);
 
-      // 3. Cálculos dos totais (convertendo Decimal do Prisma para Number)
       const totalExpenses = currentExpenses.reduce(
         (acc, item) => acc + Number(item.value),
         0,
@@ -88,14 +77,12 @@ export const SummaryController = {
         activeSignaturesAgg._sum.value || 0,
       );
 
-      // Taxa de poupança/investimento sobre o total movimentado no mês
       const totalOutflow = totalExpenses + totalInvestments;
       const investmentRate =
         totalOutflow > 0
           ? Number(((totalInvestments / totalOutflow) * 100).toFixed(2))
           : 0;
 
-      // 4. Variação percentual de gastos comparado ao mês passado
       let expenseVariationPercentage = 0;
       if (prevTotalExpenses > 0) {
         expenseVariationPercentage = Number(
@@ -106,7 +93,6 @@ export const SummaryController = {
         );
       }
 
-      // 5. Agrupamento de gastos por categoria (para gráfico de pizza/barras)
       const categoryMap = new Map<
         string,
         {
@@ -144,9 +130,8 @@ export const SummaryController = {
               ? Number(((item.total / totalExpenses) * 100).toFixed(2))
               : 0,
         }))
-        .sort((a, b) => b.total - a.total); // Ordena da maior categoria para a menor
+        .sort((a, b) => b.total - a.total);
 
-      // 6. Resumo rápido da saúde dos orçamentos
       const totalBudgetLimit = budgets.reduce(
         (acc, b) => acc + Number(b.amount),
         0,
@@ -179,6 +164,97 @@ export const SummaryController = {
       return res
         .status(500)
         .json({ message: "Erro ao gerar resumo analítico" });
+    }
+  },
+
+  async categoryChart(req: Request, res: Response) {
+    try {
+      const userId = req.user!.id;
+
+      const { startDate, endDate, month, year } = req.query;
+      let dateFilter: { gte: Date; lte: Date };
+
+      if (startDate && endDate) {
+        dateFilter = {
+          gte: new Date(`${startDate}T00:00:00.000Z`),
+          lte: new Date(`${endDate}T23:59:59.999Z`),
+        };
+      } else {
+        const now = new Date();
+        const spDate = new Date(
+          now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }),
+        );
+        const targetMonth = Number(month) || spDate.getMonth() + 1;
+        const targetYear = Number(year) || spDate.getFullYear();
+
+        dateFilter = {
+          gte: new Date(targetYear, targetMonth - 1, 1, 0, 0, 0),
+          lte: new Date(targetYear, targetMonth, 0, 23, 59, 59, 999),
+        };
+      }
+
+      const groupedExpenses = await prisma.expense.groupBy({
+        by: ["category_id"],
+        where: {
+          user_id: userId,
+          date: dateFilter,
+        },
+        _sum: {
+          value: true,
+        },
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _sum: {
+            value: "desc",
+          },
+        },
+      });
+
+      const categories = await prisma.category.findMany({
+        where: { user_id: userId },
+        select: { id: true, name: true, color: true },
+      });
+
+      const categoryInfoMap = new Map(
+        categories.map((cat) => [cat.id, { name: cat.name, color: cat.color }]),
+      );
+
+      const totalAmount = groupedExpenses.reduce(
+        (acc, item) => acc + Number(item._sum.value || 0),
+        0,
+      );
+
+      const chartData = groupedExpenses.map((item) => {
+        const value = Number(item._sum.value || 0);
+        const info = item.category_id
+          ? categoryInfoMap.get(item.category_id)
+          : null;
+
+        return {
+          categoryId: item.category_id,
+          name: info?.name || "Sem categoria",
+          value: Number(value.toFixed(2)),
+          color: info?.color || "#9ca3af",
+          percentage:
+            totalAmount > 0
+              ? Number(((value / totalAmount) * 100).toFixed(2))
+              : 0,
+          count: item._count.id,
+        };
+      });
+
+      return res.status(200).json({
+        total: Number(totalAmount.toFixed(2)),
+        slicesCount: chartData.length,
+        data: chartData,
+      });
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ message: "Erro ao agrupar gastos por categoria" });
     }
   },
 };

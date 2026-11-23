@@ -1,5 +1,36 @@
 import cron from "node-cron";
 import { prisma } from "../server";
+import { sendEmail } from "../utils/sendEmail";
+
+export async function sendUpcomingSubscriptionReminders() {
+  try {
+    const now = new Date();
+    const reminderDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
+    const dayToRemind = reminderDate.getDate();
+    const lastDayOfMonth = new Date(
+      reminderDate.getFullYear(),
+      reminderDate.getMonth() + 1,
+      0,
+    ).getDate();
+    const signatures = await prisma.signature.findMany({
+      where: { active: true, billing_day: { not: null } },
+      include: { usuarios: { select: { name: true, email: true } } },
+    });
+
+    for (const signature of signatures) {
+      const billingDay = Math.min(signature.billing_day!, lastDayOfMonth);
+      if (billingDay !== dayToRemind || !signature.usuarios.email) continue;
+
+      await sendEmail({
+        to: signature.usuarios.email,
+        subject: `Lembrete: ${signature.name} vence em 3 dias`,
+        html: `<p>Olá${signature.usuarios.name ? `, ${signature.usuarios.name}` : ""}!</p><p>A assinatura <strong>${signature.name}</strong>, no valor de R$ ${Number(signature.value).toFixed(2)}, vence em 3 dias (${reminderDate.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}).</p>`,
+      });
+    }
+  } catch (error) {
+    console.error("[CRON] Erro ao enviar lembretes de assinaturas:", error);
+  }
+}
 
 export async function processRecurringSubscription() {
   try {
@@ -56,6 +87,12 @@ export async function processRecurringSubscription() {
 }
 
 export function startSubscriptionJob() {
+  cron.schedule(
+    "0 0 * * *",
+    sendUpcomingSubscriptionReminders,
+    { timezone: "America/Sao_Paulo" },
+  );
+
   cron.schedule(
     "* * * * *",
     async () => {

@@ -49,6 +49,7 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 - [x] **Processamento de Assinaturas Recorrentes**
   - [x] Integrar biblioteca de agendamento de tarefas (`node-cron`).
   - [x] Criar rotina diária (executada à meia-noite) que verifica assinaturas ativas com vencimento no dia e lança o valor automaticamente na tabela de `Gasto`.
+        //TODO:
 - [ ] **Notificações por E-mail / Push**
   - [ ] Enviar lembretes prévios de vencimento de assinaturas e faturas ativas 3 dias antes do vencimento.
 
@@ -59,7 +60,7 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 > **Objetivo:** Permitir ao usuário extrair relatórios detalhados da sua saúde financeira.
 
 - [ ] **Endpoint Consolidado de Análise (`GET /resumo/analitico`)**
-  - [ ] Calcular taxa de poupança mensal (`(Renda Total - Gastos Totais) / Renda Total * 100`).
+  - [x] Calcular taxa de poupança mensal (`(Renda Total - Gastos Totais) / Renda Total * 100`).
   - [ ] Agrupar gastos por categoria em formato pronto para gráficos de rosca (`pie chart`).
   - [ ] Retornar evolução patrimonial dos últimos 6 meses.
 - [ ] **Exportação de Dados**

@@ -102,5 +102,11 @@ router.put(
 router.delete("/categorias/:id", authMiddleware, CategoryController.delete);
 
 router.get("/resumo", authMiddleware, UserController.getSummary);
+router.get("/resumo/analitico", authMiddleware, SummaryController.analytical);
+router.get(
+  "/resumo/categorias",
+  authMiddleware,
+  SummaryController.categoryChart,
+);
 
 export { router };
