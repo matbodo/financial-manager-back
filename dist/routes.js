@@ -9,6 +9,7 @@ const ExpensesController_js_1 = require("./controllers/ExpensesController.js");
 const SignaturesController_js_1 = require("./controllers/SignaturesController.js");
 const InvestimentsController_js_1 = require("./controllers/InvestimentsController.js");
 const CategoryController_js_1 = require("./controllers/CategoryController.js");
+const SummaryController_js_1 = require("./controllers/SummaryController.js");
 const BudgetController_js_1 = require("./controllers/BudgetController.js");
 const UserController_js_1 = require("./controllers/UserController.js");
 const gastoSchema_js_1 = require("./schemas/gastoSchema.js");
@@ -45,3 +46,5 @@ router.get("/categorias", AuthMiddleware_js_1.authMiddleware, CategoryController
 router.put("/categorias/:id", AuthMiddleware_js_1.authMiddleware, (0, validateSchema_js_1.validateSchema)(categorySchema_js_1.categorySchema), CategoryController_js_1.CategoryController.update);
 router.delete("/categorias/:id", AuthMiddleware_js_1.authMiddleware, CategoryController_js_1.CategoryController.delete);
 router.get("/resumo", AuthMiddleware_js_1.authMiddleware, UserController_js_1.UserController.getSummary);
+router.get("/resumo/analitico", AuthMiddleware_js_1.authMiddleware, SummaryController_js_1.SummaryController.analytical);
+router.get("/resumo/categorias", AuthMiddleware_js_1.authMiddleware, SummaryController_js_1.SummaryController.categoryChart);

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { authMiddleware } from "./middlewares/AuthMiddleware.js";
 import { authLimiter } from "./middlewares/rateLimiter.js";
+import { authMiddleware } from "./middlewares/AuthMiddleware.js";
 import { AuthController } from "./controllers/AuthController.js";
 import { ExpensesController } from "./controllers/ExpensesController.js";
 import { SignaturesController } from "./controllers/SignaturesController.js";
@@ -107,6 +107,11 @@ router.get(
   "/resumo/categorias",
   authMiddleware,
   SummaryController.categoryChart,
+);
+router.get(
+  "/resumo/evolucao",
+  authMiddleware,
+  SummaryController.patrimonyEvolution,
 );
 
 export { router };

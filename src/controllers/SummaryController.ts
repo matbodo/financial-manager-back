@@ -1,11 +1,17 @@
 import type { Request, Response } from "express";
 import { prisma } from "../server.js";
 import ca from "zod/v4/locales/ca.cjs";
+import { validate } from "node-cron";
 
 export const SummaryController = {
   async analytical(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
+
+      const now = new Date();
+      const spDate = new Date(
+        now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }),
+      );
 
       const month = Number(req.query.month) || spDate.getMonth() + 1;
       const year = Number(req.query.year) || spDate.getFullYear();
@@ -255,6 +261,126 @@ export const SummaryController = {
       return res
         .status(500)
         .json({ message: "Erro ao agrupar gastos por categoria" });
+    }
+  },
+
+  async patrimonyEvolution(req: Request, res: Response) {
+    try {
+      const userId = req.user!.id;
+
+      const now = new Date();
+      const spDate = new Date(
+        now.toLocaleDateString("en-US", { timeZone: "America/Sao_Paulo" }),
+      );
+      const currentMonth = spDate.getMonth();
+      const currentYear = spDate.getFullYear();
+
+      const monthsWindow: {
+        month: number;
+        year: number;
+        label: string;
+        startDate: Date;
+        endDate: Date;
+      }[] = [];
+
+      const monthFormatter = new Intl.DateTimeFormat("pt-BR", {
+        month: "short",
+      });
+
+      for (let i = 5; i >= 0; i--) {
+        const targetDate = new Date(currentYear, currentMonth - i, 1);
+        const m = targetDate.getMonth();
+        const y = targetDate.getFullYear();
+
+        const rawMonth = monthFormatter.format(targetDate).replace(".", "");
+        const captalizedMonth =
+          rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1);
+
+        monthsWindow.push({
+          month: m + 1,
+          year: y,
+          label: `${captalizedMonth}/${String(y).slice(-2)}`,
+          startDate: new Date(y, m, 1, 0, 0, 0),
+          endDate: new Date(y, m + 1, 0, 23, 59, 59, 999),
+        });
+      }
+
+      const windowStart = monthsWindow[0].startDate;
+      const windowEnd = monthsWindow[monthsWindow.length - 1].endDate;
+
+      const [previousInvestmentsAgg, windowInvestments, windowExpenses] =
+        await Promise.all([
+          prisma.investment.aggregate({
+            where: {
+              user_id: userId,
+              date: { lt: windowStart },
+            },
+            _sum: { value: true },
+          }),
+
+          prisma.investment.findMany({
+            where: {
+              user_id: userId,
+              date: { gte: windowStart, lte: windowEnd },
+            },
+            select: { value: true, date: true },
+          }),
+
+          prisma.expense.findMany({
+            where: {
+              user_id: userId,
+              date: { gte: windowStart, lte: windowEnd },
+            },
+            select: { value: true, date: true },
+          }),
+        ]);
+
+      let accumulatedPatrimony = Number(previousInvestmentsAgg._sum.value || 0);
+
+      const evolution = monthsWindow.map((item) => {
+        const monthlyInvested = windowInvestments
+          .filter((inv) => {
+            if (!inv.date) return false;
+            const d = new Date(inv.date);
+            return d >= item.startDate && d <= item.endDate;
+          })
+          .reduce((acc, inv) => acc + Number(inv.value), 0);
+
+        const monthlyExpenses = windowExpenses
+          .filter((exp) => {
+            if (!exp.date) return false;
+            const d = new Date(exp.date);
+            return d >= item.startDate && d <= item.endDate;
+          })
+          .reduce((acc, exp) => acc + Number(exp.value), 0);
+
+        accumulatedPatrimony += monthlyInvested;
+
+        return {
+          month: item.month,
+          year: item.year,
+          label: item.label,
+          invested: Number(monthlyInvested.toFixed(2)),
+          expenses: Number(monthlyExpenses.toFixed(2)),
+          accumulatedPatrimony: Number(accumulatedPatrimony.toFixed(2)),
+        };
+      });
+
+      const initialPatrimony = Number(previousInvestmentsAgg._sum.value || 0);
+      const currentPatrimony =
+        evolution[evolution.length - 1]?.accumulatedPatrimony || 0;
+
+      return res.status(200).json({
+        initialPatrimony: Number(initialPatrimony.toFixed(2)),
+        currentPatrimony,
+        periodGrowth: Number((currentPatrimony - initialPatrimony).toFixed(2)),
+        data: evolution,
+      });
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ message: "Erro ao calcular evolução patrimonial" });
     }
   },
 };
