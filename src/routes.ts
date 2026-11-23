@@ -115,5 +115,6 @@ router.get(
   SummaryController.patrimonyEvolution,
 );
 router.get("/export/csv", authMiddleware, ExportController.exportCSV);
+router.get("/export/pdf", authMiddleware, ExportController.exportPdf);
 
 export { router };

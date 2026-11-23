@@ -22,6 +22,7 @@
     "jsonwebtoken": "^9.0.3",
     "node-cron": "^4.6.0",
     "nodemailer": "^10.4.0",
+    "pdfkit": "^0.21.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -32,6 +33,7 @@
     "@types/node": "^25.9.5",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^8.0.2",
+    "@types/pdfkit": "^0.17.7",
     "prisma": "^7.10.1",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2"

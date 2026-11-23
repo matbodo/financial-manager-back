@@ -51,3 +51,4 @@ router.get("/resumo/analitico", AuthMiddleware_js_1.authMiddleware, SummaryContr
 router.get("/resumo/categorias", AuthMiddleware_js_1.authMiddleware, SummaryController_js_1.SummaryController.categoryChart);
 router.get("/resumo/evolucao", AuthMiddleware_js_1.authMiddleware, SummaryController_js_1.SummaryController.patrimonyEvolution);
 router.get("/export/csv", AuthMiddleware_js_1.authMiddleware, ExportController_js_1.ExportController.exportCSV);
+router.get("/export/pdf", AuthMiddleware_js_1.authMiddleware, ExportController_js_1.ExportController.exportPdf);
