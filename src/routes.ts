@@ -8,6 +8,7 @@ import { InvestimentsController } from "./controllers/InvestimentsController.js"
 import { CategoryController } from "./controllers/CategoryController.js";
 import { SummaryController } from "./controllers/SummaryController.js";
 import { BudgetController } from "./controllers/BudgetController.js";
+import { ExportController } from "./controllers/ExportController.js";
 import { UserController } from "./controllers/UserController.js";
 import { createGastoSchema, updateGastoSchema } from "./schemas/gastoSchema.js";
 import { validateSchema } from "./schemas/validateSchema.js";
@@ -113,5 +114,6 @@ router.get(
   authMiddleware,
   SummaryController.patrimonyEvolution,
 );
+router.get("/export/csv", authMiddleware, ExportController.exportCSV);
 
 export { router };

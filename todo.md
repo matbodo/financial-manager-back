@@ -59,7 +59,7 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 
 > **Objetivo:** Permitir ao usuário extrair relatórios detalhados da sua saúde financeira.
 
-- [ ] **Endpoint Consolidado de Análise (`GET /resumo/analitico`)**
+- [x] **Endpoint Consolidado de Análise (`GET /resumo/analitico`)**
   - [x] Calcular taxa de poupança mensal (`(Renda Total - Gastos Totais) / Renda Total * 100`).
   - [x] Agrupar gastos por categoria em formato pronto para gráficos de rosca (`pie chart`).
   - [x] Retornar evolução patrimonial dos últimos 6 meses.

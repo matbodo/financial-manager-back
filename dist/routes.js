@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 const express_1 = require("express");
-const AuthMiddleware_js_1 = require("./middlewares/AuthMiddleware.js");
 const rateLimiter_js_1 = require("./middlewares/rateLimiter.js");
+const AuthMiddleware_js_1 = require("./middlewares/AuthMiddleware.js");
 const AuthController_js_1 = require("./controllers/AuthController.js");
 const ExpensesController_js_1 = require("./controllers/ExpensesController.js");
 const SignaturesController_js_1 = require("./controllers/SignaturesController.js");
@@ -11,6 +11,7 @@ const InvestimentsController_js_1 = require("./controllers/InvestimentsControlle
 const CategoryController_js_1 = require("./controllers/CategoryController.js");
 const SummaryController_js_1 = require("./controllers/SummaryController.js");
 const BudgetController_js_1 = require("./controllers/BudgetController.js");
+const ExportController_js_1 = require("./controllers/ExportController.js");
 const UserController_js_1 = require("./controllers/UserController.js");
 const gastoSchema_js_1 = require("./schemas/gastoSchema.js");
 const validateSchema_js_1 = require("./schemas/validateSchema.js");
@@ -48,3 +49,5 @@ router.delete("/categorias/:id", AuthMiddleware_js_1.authMiddleware, CategoryCon
 router.get("/resumo", AuthMiddleware_js_1.authMiddleware, UserController_js_1.UserController.getSummary);
 router.get("/resumo/analitico", AuthMiddleware_js_1.authMiddleware, SummaryController_js_1.SummaryController.analytical);
 router.get("/resumo/categorias", AuthMiddleware_js_1.authMiddleware, SummaryController_js_1.SummaryController.categoryChart);
+router.get("/resumo/evolucao", AuthMiddleware_js_1.authMiddleware, SummaryController_js_1.SummaryController.patrimonyEvolution);
+router.get("/export/csv", AuthMiddleware_js_1.authMiddleware, ExportController_js_1.ExportController.exportCSV);

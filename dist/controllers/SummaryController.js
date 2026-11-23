@@ -211,7 +211,7 @@ exports.SummaryController = {
                 const m = targetDate.getMonth();
                 const y = targetDate.getFullYear();
                 const rawMonth = monthFormatter.format(targetDate).replace(".", "");
-                const captalizedMonth = rawMonth.charAt(0).toUpperCase + rawMonth.slice(1);
+                const captalizedMonth = rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1);
                 monthsWindow.push({
                     month: m + 1,
                     year: y,
