@@ -63,9 +63,9 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
   - [x] Calcular taxa de poupança mensal (`(Renda Total - Gastos Totais) / Renda Total * 100`).
   - [x] Agrupar gastos por categoria em formato pronto para gráficos de rosca (`pie chart`).
   - [x] Retornar evolução patrimonial dos últimos 6 meses.
-- [ ] **Exportação de Dados**
-  - [ ] Criar rota `GET /export/csv` para download da planilha de movimentações em formato CSV.
-  - [ ] Criar rota `GET /export/pdf` para geração de relatório financeiro formatado em PDF (utilizando `pdfkit` ou `puppeteer`).
+- [x] **Exportação de Dados**
+  - [x] Criar rota `GET /export/csv` para download da planilha de movimentações em formato CSV.
+  - [x] Criar rota `GET /export/pdf` para geração de relatório financeiro formatado em PDF (utilizando `pdfkit` ou `puppeteer`).
 
 ---
 
