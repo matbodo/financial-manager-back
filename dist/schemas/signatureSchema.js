@@ -10,7 +10,8 @@ exports.createSignatureSchema = zod_1.z.object({
         .int()
         .min(1, "O dia de cobrança deve ser entre 1 e 31")
         .max(31, "O dia de cobrança deve ser entre 1 e 31"),
-    category_id: zod_1.z.number().int().optional(),
+    category_id: zod_1.z.number().int().positive().nullable().optional(),
+    account_id: zod_1.z.number().int().positive().nullable().optional(),
     active: zod_1.z.boolean().optional(),
     date: zod_1.z.string().datetime({ message: "Data inválida" }).optional(),
 });

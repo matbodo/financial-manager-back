@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
 import { prisma } from "../server.js";
 import {
-  createGastoSchema,
-  updateGastoSchema,
-} from "../schemas/gastoSchema.js";
+  createExpenseSchema,
+  updateExpenseSchema,
+} from "../schemas/expenseSchema.js";
 import {
   buildListQuery,
   formatPaginationResponse,
@@ -12,7 +12,7 @@ import {
 export const ExpensesController = {
   async create(req: Request, res: Response) {
     try {
-      const validation = createGastoSchema.safeParse(req.body);
+      const validation = createExpenseSchema.safeParse(req.body);
 
       if (!validation.success) {
         return res.status(400).json({
@@ -21,15 +21,45 @@ export const ExpensesController = {
         });
       }
 
-      const { name, value, date } = validation.data;
+      const { name, value, date, category_id, account_id } = validation.data;
+      const userId = req.user!.id;
 
-      const expense = await prisma.expense.create({
-        data: {
-          name,
-          value,
-          date: date ? new Date(date) : new Date(),
-          user_id: req.user!.id,
-        },
+      if (account_id) {
+        const accountExists = await prisma.account.findFirst({
+          where: { id: account_id, user_id: userId },
+        });
+
+        if (!accountExists) {
+          return res.status(404).json({ message: "Conta não encontrada" });
+        }
+      }
+
+      const expense = await prisma.$transaction(async (tx) => {
+        const created = await tx.expense.create({
+          data: {
+            name,
+            value,
+            date: date ? new Date(date) : new Date(),
+            category_id: category_id ?? null,
+            account_id: account_id ?? null,
+            user_id: req.user!.id,
+          },
+          include: {
+            category: true,
+            account: true,
+          },
+        });
+
+        if (account_id) {
+          await tx.account.update({
+            where: { id: account_id },
+            data: {
+              balance: { decrement: value },
+            },
+          });
+        }
+
+        return created;
       });
 
       return res.status(201).json(expense);
@@ -77,12 +107,13 @@ export const ExpensesController = {
   async update(req: Request, res: Response) {
     try {
       const gastoId = Number(req.params.id);
+      const userId = req.user!.id;
 
       if (Number.isNaN(gastoId)) {
         return res.status(400).json({ message: "ID de gasto inválido" });
       }
 
-      const validation = updateGastoSchema.safeParse(req.body);
+      const validation = updateExpenseSchema.safeParse(req.body);
 
       if (!validation.success) {
         return res.status(400).json({
@@ -94,7 +125,7 @@ export const ExpensesController = {
       const gastoExisting = await prisma.expense.findFirst({
         where: {
           id: gastoId,
-          user_id: req.user!.id,
+          user_id: userId,
         },
       });
 
@@ -102,17 +133,63 @@ export const ExpensesController = {
         return res.status(404).json({ message: "Gasto não encontrado" });
       }
 
-      const { name, value, date } = validation.data;
+      const { name, value, date, category_id, account_id } = validation.data;
 
-      const gastoUpdated = await prisma.expense.update({
-        where: {
-          id: gastoExisting.id,
-        },
-        data: {
-          ...(name !== undefined && { name }),
-          ...(value !== undefined && { value }),
-          ...(date !== undefined && { date: new Date(date) }),
-        },
+      if (account_id) {
+        const accountExists = await prisma.account.findFirst({
+          where: {
+            id: account_id,
+            user_id: userId,
+          },
+        });
+
+        if (!accountExists) {
+          return res.status(404).json({ message: "Conta não encontrada" });
+        }
+      }
+
+      const finalValue =
+        value !== undefined ? value : Number(gastoExisting.value);
+      const finalAccountId =
+        account_id !== undefined ? account_id : gastoExisting.account_id;
+
+      const gastoUpdated = await prisma.$transaction(async (tx) => {
+        if (gastoExisting.account_id) {
+          await tx.account.update({
+            where: { id: gastoExisting.account_id },
+            data: {
+              balance: { increment: gastoExisting.value },
+            },
+          });
+        }
+
+        const updated = await tx.expense.update({
+          where: {
+            id: gastoExisting.id,
+          },
+          data: {
+            ...(name !== undefined && { name }),
+            ...(value !== undefined && { value }),
+            ...(date !== undefined && { date: new Date(date) }),
+            ...(category_id !== undefined && { category_id }),
+            ...(account_id !== undefined && { account_id }),
+          },
+          include: {
+            category: true,
+            account: true,
+          },
+        });
+
+        if (finalAccountId) {
+          await tx.account.update({
+            where: { id: finalAccountId },
+            data: {
+              balance: { decrement: finalValue },
+            },
+          });
+        }
+
+        return updated;
       });
 
       return res.status(200).json(gastoUpdated);
@@ -141,10 +218,21 @@ export const ExpensesController = {
         return res.status(404).json({ message: "Gasto não encontrado" });
       }
 
-      await prisma.expense.delete({
-        where: {
-          id: gasto.id,
-        },
+      await prisma.$transaction(async (tx) => {
+        if (gasto.account_id) {
+          await tx.account.update({
+            where: { id: gasto.account_id },
+            data: {
+              balance: { increment: gasto.value },
+            },
+          });
+        }
+
+        await prisma.expense.delete({
+          where: {
+            id: gasto.id,
+          },
+        });
       });
 
       return res.status(200).json({ message: "Gasto deletado com sucesso" });

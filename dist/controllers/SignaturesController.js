@@ -14,15 +14,30 @@ exports.SignaturesController = {
                     error: validation.error.flatten().fieldErrors,
                 });
             }
-            const { name, value, billing_day, category_id, date } = validation.data;
+            const { name, value, billing_day, category_id, account_id, date, active, } = validation.data;
+            const userId = req.user.id;
+            if (account_id) {
+                const accountExists = await server_js_1.prisma.account.findFirst({
+                    where: { id: account_id, user_id: userId },
+                });
+                if (!accountExists) {
+                    return res.status(404).json({ message: "Conta não encontrada" });
+                }
+            }
             const signature = await server_js_1.prisma.signature.create({
                 data: {
                     name,
                     value,
                     billing_day,
-                    category_id,
+                    category_id: category_id ?? null,
+                    account_id: account_id ?? null,
                     date: date ? new Date(date) : new Date(),
-                    user_id: req.user.id,
+                    ...(active !== undefined && { active }),
+                    user_id: userId,
+                },
+                include: {
+                    category: true,
+                    account: true,
                 },
             });
             return res.status(201).json(signature);
@@ -45,7 +60,7 @@ exports.SignaturesController = {
                     skip: query.skip,
                     take: query.take,
                     orderBy: query.orderBy,
-                    include: { category: true },
+                    include: { category: true, account: true },
                 }),
                 server_js_1.prisma.signature.count({ where: query.where }),
             ]);
@@ -61,6 +76,7 @@ exports.SignaturesController = {
     async update(req, res) {
         try {
             const signatureId = Number(req.params.id);
+            const userId = req.user.id;
             if (Number.isNaN(signatureId)) {
                 return res.status(400).json({ message: "ID de assinatura inválido" });
             }
@@ -74,13 +90,21 @@ exports.SignaturesController = {
             const signatureExisting = await server_js_1.prisma.signature.findFirst({
                 where: {
                     id: signatureId,
-                    user_id: req.user.id,
+                    user_id: userId,
                 },
             });
             if (!signatureExisting) {
                 return res.status(404).json({ message: "Assinatura não encontrada" });
             }
-            const { name, value, active, category_id, billing_day, date } = validation.data;
+            const { name, value, active, category_id, account_id, billing_day, date, } = validation.data;
+            if (account_id) {
+                const accountExists = await server_js_1.prisma.account.findFirst({
+                    where: { id: account_id, user_id: userId },
+                });
+                if (!accountExists) {
+                    return res.status(404).json({ message: "Conta não encontrada" });
+                }
+            }
             const signatureUpdated = await server_js_1.prisma.signature.update({
                 where: {
                     id: signatureExisting.id,
@@ -89,8 +113,14 @@ exports.SignaturesController = {
                     ...(name !== undefined && { name }),
                     ...(value !== undefined && { value }),
                     ...(active !== undefined && { active }),
+                    ...(billing_day !== undefined && { billing_day }),
                     ...(category_id !== undefined && { category_id }),
+                    ...(account_id !== undefined && { account_id }),
                     ...(date !== undefined && { date: new Date(date) }),
+                },
+                include: {
+                    category: true,
+                    account: true,
                 },
             });
             return res.status(200).json(signatureUpdated);

@@ -74,7 +74,7 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
 > **Objetivo:** Evoluir o modelo de dados para suportar gerenciamento de múltiplas bancas e faturas de cartão.
 
 - [ ] **Gestão de Contas (`Account`)**
-  - [ ] Modelar contas no Prisma (ex: Banco Inter, Nubank, Carteira de Dinheiro).
+  - [x] Modelar contas no Prisma (ex: Banco Inter, Nubank, Carteira de Dinheiro).
   - [ ] Permitir vincular receitas e despesas a uma conta específica com atualização dinâmica de saldo.
 - [ ] **Gestão de Cartões de Crédito**
   - [ ] Modelar controle de faturas (data de fechamento e data de vencimento).

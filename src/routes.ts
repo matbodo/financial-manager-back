@@ -6,11 +6,15 @@ import { ExpensesController } from "./controllers/ExpensesController.js";
 import { SignaturesController } from "./controllers/SignaturesController.js";
 import { InvestimentsController } from "./controllers/InvestimentsController.js";
 import { CategoryController } from "./controllers/CategoryController.js";
+import { AccountController } from "./controllers/AccountController.js";
 import { SummaryController } from "./controllers/SummaryController.js";
 import { BudgetController } from "./controllers/BudgetController.js";
 import { ExportController } from "./controllers/ExportController.js";
 import { UserController } from "./controllers/UserController.js";
-import { createGastoSchema, updateGastoSchema } from "./schemas/gastoSchema.js";
+import {
+  createExpenseSchema,
+  updateExpenseSchema,
+} from "./schemas/expenseSchema.js";
 import { validateSchema } from "./schemas/validateSchema.js";
 import { categorySchema } from "./schemas/categorySchema.js";
 import {
@@ -75,14 +79,14 @@ router.delete(
 router.post(
   "/gastos",
   authMiddleware,
-  validateSchema(createGastoSchema),
+  validateSchema(createExpenseSchema),
   ExpensesController.create,
 );
 router.get("/gastos", authMiddleware, ExpensesController.list);
 router.put(
   "/gastos/:id",
   authMiddleware,
-  validateSchema(createGastoSchema),
+  validateSchema(createExpenseSchema),
   ExpensesController.create,
 );
 router.delete("/gastos/:id", authMiddleware, ExpensesController.delete);
@@ -116,5 +120,10 @@ router.get(
 );
 router.get("/export/csv", authMiddleware, ExportController.exportCSV);
 router.get("/export/pdf", authMiddleware, ExportController.exportPdf);
+
+router.post("/contas", authMiddleware, AccountController.create);
+router.get("/contas", authMiddleware, AccountController.list);
+router.put("/contas/:id", authMiddleware, AccountController.update);
+router.delete("/contas/:id", authMiddleware, AccountController.delete);
 
 export { router };

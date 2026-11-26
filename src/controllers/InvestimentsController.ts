@@ -21,15 +21,41 @@ export const InvestimentsController = {
         });
       }
 
-      const { name, value, date } = validation.data;
+      const { name, value, date, category_id, account_id } = validation.data;
+      const userId = req.user!.id;
 
-      const investiments = await prisma.investment.create({
-        data: {
-          name,
-          value,
-          date: date ? new Date(date) : new Date(),
-          user_id: req.user!.id,
-        },
+      if (account_id) {
+        const accountExisting = await prisma.account.findFirst({
+          where: { id: account_id, user_id: userId },
+        });
+
+        if (!accountExisting) {
+          return res.status(404).json({ message: "Conta não encontrada" });
+        }
+      }
+
+      const investiments = await prisma.$transaction(async (tx) => {
+        const createdInvestment = await tx.investment.create({
+          data: {
+            name,
+            value,
+            date: date ? new Date(date) : new Date(),
+            category_id: category_id ?? null,
+            account_id: account_id ?? null,
+            user_id: userId,
+          },
+        });
+
+        if (account_id) {
+          await tx.account.update({
+            where: { id: account_id },
+            data: {
+              balance: { increment: value },
+            },
+          });
+        }
+
+        return createdInvestment;
       });
 
       return res.status(201).json(investiments);
@@ -77,6 +103,7 @@ export const InvestimentsController = {
   async update(req: Request, res: Response) {
     try {
       const investimentId = Number(req.params.id);
+      const userId = req.user!.id;
 
       if (Number.isNaN(investimentId)) {
         return res.status(400).json({
@@ -96,7 +123,7 @@ export const InvestimentsController = {
       const investimentExisting = await prisma.investment.findFirst({
         where: {
           id: investimentId,
-          user_id: req.user!.id,
+          user_id: userId,
         },
       });
 
@@ -104,17 +131,60 @@ export const InvestimentsController = {
         return res.status(404).json({ message: "Investimento não encontrado" });
       }
 
-      const { name, value, date } = validation.data;
+      const { name, value, date, category_id, account_id } = validation.data;
 
-      const investimentUpdated = await prisma.investment.update({
-        where: {
-          id: investimentExisting.id,
-        },
-        data: {
-          ...(name !== undefined && { name }),
-          ...(value !== undefined && { value }),
-          ...(date !== undefined && { date: new Date(date) }),
-        },
+      if (account_id) {
+        const accountExisting = await prisma.account.findFirst({
+          where: { id: account_id, user_id: userId },
+        });
+
+        if (!accountExisting) {
+          return res.status(404).json({ message: "Conta nao encontrada" });
+        }
+      }
+
+      const finalValue =
+        value !== undefined ? value : Number(investimentExisting.value);
+      const finalAccountId =
+        account_id !== undefined ? account_id : investimentExisting.account_id;
+
+      const investimentUpdated = await prisma.$transaction(async (tx) => {
+        if (investimentExisting.account_id) {
+          await tx.account.update({
+            where: { id: investimentExisting.account_id },
+            data: {
+              balance: { decrement: investimentExisting.value },
+            },
+          });
+        }
+
+        const updated = await tx.investment.update({
+          where: {
+            id: investimentExisting.id,
+          },
+          data: {
+            ...(name !== undefined && { name }),
+            ...(value !== undefined && { value }),
+            ...(date !== undefined && { date: new Date(date) }),
+            ...(category_id !== undefined && { category_id }),
+            ...(account_id !== undefined && { account_id }),
+          },
+          include: {
+            category: true,
+            account: true,
+          },
+        });
+
+        if (finalAccountId) {
+          await tx.account.update({
+            where: { id: finalAccountId },
+            data: {
+              balance: { increment: finalValue },
+            },
+          });
+        }
+
+        return updated;
       });
 
       return res.status(200).json(investimentUpdated);
@@ -142,10 +212,21 @@ export const InvestimentsController = {
         return res.status(404).json({ message: "Investimento não encontrado" });
       }
 
-      await prisma.investment.delete({
-        where: {
-          id: investiment.id,
-        },
+      await prisma.$transaction(async (tx) => {
+        if (investiment.account_id) {
+          await tx.account.update({
+            where: { id: investiment.account_id },
+            data: {
+              balance: { decrement: investiment.value },
+            },
+          });
+        }
+
+        await tx.investment.delete({
+          where: {
+            id: investiment.id,
+          },
+        });
       });
 
       return res
