@@ -23,6 +23,7 @@ model User {
   budgets             Budget[]
   refresh_tokens      RefreshToken[]
   accounts            Account[]
+  credit_cards        CreditCard[]
 
   @@map("usuarios")
 }
@@ -73,6 +74,9 @@ model Expense {
 
   account_id  Int?
   account     Account?  @relation(fields: [account_id], references: [id], onDelete: SetNull)
+
+  invoice_id Int?
+  invoice    Invoice? @relation(fields: [invoice_id], references: [id], onDelete: SetNull)
 
   @@index([user_id], map: "user_id")
 }
@@ -137,18 +141,62 @@ enum AccountType {
 }
 
 model Account {
-  id          Int           @id @default(autoincrement())
-  name        String        
-  type        AccountType   @default(CHECKING)
-  balance     Decimal       @default(0) @db.Decimal(10, 2)
-  color       String?       @default("#6366f1")  
-  user_id     Int
-  created_at  DateTime      @default(now())
+  id            Int           @id @default(autoincrement())
+  name          String        
+  type          AccountType   @default(CHECKING)
+  balance       Decimal       @default(0) @db.Decimal(10, 2)
+  color         String?       @default("#6366f1")  
+  user_id       Int
+  created_at    DateTime      @default(now())
 
-  user          User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
   expenses      Expense[]
   investments   Investment[]
   signatures    Signature[]
+  credit_cards  CreditCard[]
 
   @@map("accounts")
+}
+
+enum InvoiceStatus {
+  OPEN
+  CLOSED
+  PAID
+}
+
+model CreditCard {
+  id            Int        @id @default(autoincrement())
+  name          String  
+  limit         Decimal    @db.Decimal(10, 2)
+  closing_day   Int 
+  due_day       Int 
+  color         String?    @default("#820ad1")
+  user_id       Int 
+  account_id    Int?  
+  created_at    DateTime   @default(now())
+    
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  account       Account?  @relation(fields: [account_id], references: [id], onDelete: SetNull)
+  invoices      Invoice[]
+
+  @@map("credit_cards")      
+}
+
+model Invoice {
+  id              Int           @id @default(autoincrement())
+  month           Int
+  year            Int
+  closing_date    DateTime
+  due_date        DateTime
+  total_amount    Decimal       @default(0) @db.Decimal(10, 2)
+  status          InvoiceStatus @default(OPEN)
+  paid_at         DateTime?
+  credit_card_id  Int
+  created_at      DateTime      @default(now())
+
+  credit_card     CreditCard    @relation(fields: [credit_card_id], references: [id], onDelete: Cascade)
+  expenses        Expense[]
+
+  @@unique([credit_card_id, month, year])
+  @@map("invoices")
 }

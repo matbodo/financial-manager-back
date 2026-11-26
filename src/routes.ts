@@ -86,8 +86,8 @@ router.get("/gastos", authMiddleware, ExpensesController.list);
 router.put(
   "/gastos/:id",
   authMiddleware,
-  validateSchema(createExpenseSchema),
-  ExpensesController.create,
+  validateSchema(updateExpenseSchema),
+  ExpensesController.update,
 );
 router.delete("/gastos/:id", authMiddleware, ExpensesController.delete);
 
