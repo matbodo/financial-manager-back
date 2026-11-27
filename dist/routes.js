@@ -41,8 +41,9 @@ router.put("/investimentos/:id", AuthMiddleware_js_1.authMiddleware, Investiment
 router.delete("/investimentos/:id", AuthMiddleware_js_1.authMiddleware, InvestimentsController_js_1.InvestimentsController.delete);
 router.post("/gastos", AuthMiddleware_js_1.authMiddleware, (0, validateSchema_js_1.validateSchema)(expenseSchema_js_1.createExpenseSchema), ExpensesController_js_1.ExpensesController.create);
 router.get("/gastos", AuthMiddleware_js_1.authMiddleware, ExpensesController_js_1.ExpensesController.list);
-router.put("/gastos/:id", AuthMiddleware_js_1.authMiddleware, (0, validateSchema_js_1.validateSchema)(expenseSchema_js_1.createExpenseSchema), ExpensesController_js_1.ExpensesController.create);
+router.put("/gastos/:id", AuthMiddleware_js_1.authMiddleware, (0, validateSchema_js_1.validateSchema)(expenseSchema_js_1.updateExpenseSchema), ExpensesController_js_1.ExpensesController.update);
 router.delete("/gastos/:id", AuthMiddleware_js_1.authMiddleware, ExpensesController_js_1.ExpensesController.delete);
+router.delete("/gastos/parcelamento/:groupId", AuthMiddleware_js_1.authMiddleware, ExpensesController_js_1.ExpensesController.deleteInstallmentGroup);
 router.post("/categorias", AuthMiddleware_js_1.authMiddleware, (0, validateSchema_js_1.validateSchema)(categorySchema_js_1.categorySchema), CategoryController_js_1.CategoryController.create);
 router.get("/categorias", AuthMiddleware_js_1.authMiddleware, CategoryController_js_1.CategoryController.list);
 router.put("/categorias/:id", AuthMiddleware_js_1.authMiddleware, (0, validateSchema_js_1.validateSchema)(categorySchema_js_1.categorySchema), CategoryController_js_1.CategoryController.update);

@@ -90,6 +90,11 @@ router.put(
   ExpensesController.update,
 );
 router.delete("/gastos/:id", authMiddleware, ExpensesController.delete);
+router.delete(
+  "/gastos/parcelamento/:groupId",
+  authMiddleware,
+  ExpensesController.deleteInstallmentGroup,
+);
 
 router.post(
   "/categorias",

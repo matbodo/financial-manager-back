@@ -76,7 +76,10 @@ model Expense {
   account     Account?  @relation(fields: [account_id], references: [id], onDelete: SetNull)
 
   invoice_id Int?
-  invoice    Invoice? @relation(fields: [invoice_id], references: [id], onDelete: SetNull)
+  invoice    Invoice?   @relation(fields: [invoice_id], references: [id], onDelete: SetNull)
+  installment_group_id  String?  
+  installment_number    Int?     
+  total_installments    Int?
 
   @@index([user_id], map: "user_id")
 }

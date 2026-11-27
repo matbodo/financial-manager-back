@@ -77,7 +77,7 @@ Este documento detalha o plano de ação técnico para a evolução da API do **
   - [x] Modelar contas no Prisma (ex: Banco Inter, Nubank, Carteira de Dinheiro).
   - [x] Permitir vincular receitas e despesas a uma conta específica com atualização dinâmica de saldo.
 - [ ] **Gestão de Cartões de Crédito**
-  - [ ] Modelar controle de faturas (data de fechamento e data de vencimento).
+  - [x] Modelar controle de faturas (data de fechamento e data de vencimento).
   - [ ] Agrupar compras parceladas distribuindo os lançamentos nos meses subsequentes.
 
 ---
